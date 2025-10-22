@@ -1,0 +1,3 @@
+This will contain the text that shows up when you run the manual method for a class.
+All the code/files for the command should remain inside its own folder.
+
