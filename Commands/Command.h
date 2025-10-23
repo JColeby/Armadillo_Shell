@@ -1,24 +1,26 @@
 #pragma once
 #include <string>
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 
 using namespace std;
 
-// ===================={ Command Template }====================
-
+// ===================={ Command Parent }====================
+template <typename T>
 class Command {
-    vector<string> tokenizedCommand;
 
 public:
-    Command(vector<string>& tokenizedCommand);
+    // setting virtual methods to 0/default tells the compiler that each child class will have its own implementation
+    static bool validateSyntax(vector<string> tokens) { return T::validateSyntax(tokens); };
+    virtual vector<string> executeCommand() = 0;
+    static string returnManFilePath() { return T::returnManFilePath();}
+    virtual ~Command() = default;
 
-    bool validateSyntax() {
-        return false;
-    }
-
-    vector<string> executeCommand() {
-        return {"command output", "error code as a string"}; ;;
+protected: // like private, but it allows child classes to inherit the methods
+    // this will contain methods that you can use to validate command syntax
+    static bool isValidFilePath(string filePath) {
+        return true;
     }
 };
 

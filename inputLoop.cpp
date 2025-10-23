@@ -1,3 +1,8 @@
-//
-// Created by jcbos on 10/22/2025.
-//
+#include "inputLoop.h"
+
+
+int inputLoop() {
+    std::cout << "Hello World!" << std::endl;
+    inputHandler("userInput");
+    return 0;
+}

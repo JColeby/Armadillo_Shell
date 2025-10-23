@@ -8,6 +8,4 @@
 
 using namespace std;
 
-vector<string> pipeHandler(const vector<string>& tokenizedInput) {
-    return {"command output", "error code as a string"}; ;;
-}
+vector<string> pipeHandler(const vector<string>& tokenizedInput);

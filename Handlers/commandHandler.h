@@ -7,6 +7,4 @@
 
 using namespace std;
 
-vector<string> commandHandler(vector<string>& tokenizedInput) {
-    return validateAndExecuteCommand<ExampleCommand>(tokenizedInput);;
-}
+vector<string> commandHandler(vector<string>& tokenizedInput);

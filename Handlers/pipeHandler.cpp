@@ -1,3 +1,5 @@
-//
-// Created by jcbos on 10/22/2025.
-//
+#include "../Commands/importAllCommands.h"
+
+vector<string> pipeHandler(const vector<string>& tokenizedInput) {
+    return {"command output", "error code as a string"}; ;;
+}

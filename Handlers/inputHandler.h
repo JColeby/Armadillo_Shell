@@ -4,15 +4,11 @@
 #include <vector>
 
 #include "commandHandler.h"
-#include "pipeHandler.cpp"
+#include "pipeHandler.h"
 
 using namespace std;
 
-int inputHandler(const string& userInput) {
-    return -1;
-}
+int inputHandler(const string& userInput) ;
 
-vector<string> tokenizeInput(string inputString) {
-    return {"tokenized", "input"}; ;
-}
+vector<string> tokenizeInput(string inputString) ;
 
