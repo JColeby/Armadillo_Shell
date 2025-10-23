@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.10)  # 4.0 is invalid — latest stable minimum is 3.x
+cmake_minimum_required(VERSION 3.10)
 project(OperatingSystemsFinal)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # -----------------------
@@ -33,25 +33,10 @@ add_executable(CommandTests
 # -----------------------
 # Test: Example Command
 # -----------------------
-add_executable(CommandTestsExampleCommand_v2
+add_executable(CommandTestsExampleCommand
         Tests/builtinCommandTests/testExampleCommand.cpp
         ${SHELL_SOURCES}
 )
 
-# -----------------------
-# Enable testing via CTest (optional but recommended)
-# -----------------------
-enable_testing()
 
-add_test(NAME RunCommandTests COMMAND CommandTests)
-add_test(NAME RunExampleCommandTests COMMAND CommandTestsExampleCommand)
-
-add_executable(CommandTestsExampleCommand
-#        Armadillo_Shell/Tests/testMain.cpp
-        Tests/builtinCommandTests/testExampleCommand.cpp
-        Handlers/commandHandler.cpp
-        Handlers/inputHandler.cpp
-        Handlers/pipeHandler.cpp
-        inputLoop.cpp
-)
 
