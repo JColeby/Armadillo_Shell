@@ -7,6 +7,8 @@
 using namespace std;
 
 // ===================={ Command Parent }====================
+// Please don't modify this file unless you know what you are doing!
+
 template <typename T>
 class Command {
 
@@ -18,9 +20,6 @@ public:
     virtual ~Command() = default;
 
 protected: // like private, but it allows child classes to inherit the methods
-    // this will contain methods that you can use to validate command syntax
-    static bool isValidFilePath(string filePath) {
-        return true;
-    }
+    // this will contain methods that you want to have shared across multiple commands
 };
 

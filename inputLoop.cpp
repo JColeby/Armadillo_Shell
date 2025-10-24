@@ -11,11 +11,9 @@ int inputLoop() {
       runningCommand = true;
       thread t(inputHandler, input);
       while (runningCommand) {
-        bool ctrlDown = GetAsyncKeyState(VK_CONTROL) & 0x8000;
+        bool ctrlDown = GetAsyncKeyState(VK_CONTROL) & 0x8000; // 0x8000 means the key is currently being pressed
         bool qDown = GetAsyncKeyState('Q') & 0x8000;
-        if (ctrlDown && qDown) {
-          killSwitch = true;
-        }
+        if (ctrlDown && qDown) { killSwitch = true; }
       }
       t.join();
     }
@@ -25,7 +23,7 @@ int displayCurrentDirectory() {
     TCHAR pathBuffer[MAX_PATH];
     DWORD length = GetCurrentDirectory(MAX_PATH, pathBuffer); // windows system call
     if (length == 0) {
-      cerr << "Error getting current directory. Exiting Armadillo" << endl;
+      cerr << "FATAL ERROR: failed to fetch current directory. Exiting Armadillo" << endl;
       return -1;
     }
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14); // yellow

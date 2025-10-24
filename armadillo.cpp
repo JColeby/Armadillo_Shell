@@ -20,10 +20,12 @@ int main() {
     printTextFile("../Resources/armadilloASCII.txt");
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
     cout << "##########################################################################################" << endl;
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 12);
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9);
     printTextFile("../Resources/armadilloLogo.txt");
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
     cout << "##########################################################################################" << endl << endl;
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    cout << "     -  press ctrl+q to terminate any active command" << endl << "     -  use 'exit' command to close the shell" << endl << endl;
     return inputLoop();
 }
 
