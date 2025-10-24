@@ -11,6 +11,7 @@ set(SHELL_SOURCES
         Handlers/commandHandler.cpp
         Handlers/inputHandler.cpp
         Handlers/pipeHandler.cpp
+        Globals/GlobalFlags.cpp
         inputLoop.cpp
 )
 

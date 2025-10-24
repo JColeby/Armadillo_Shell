@@ -1,8 +1,41 @@
 #include "inputLoop.h"
 
 
+
 int inputLoop() {
-    std::cout << "Hello World!" << std::endl;
-    inputHandler("userInput");
-    return 0;
+    while (true) {
+      if (displayCurrentDirectory() == -1) { return -1; }
+      string input;
+      getline(cin, input);
+      if (input == "exit") { return 0; } // exits the shell
+      runningCommand = true;
+      thread t(inputHandler, input);
+      while (runningCommand) {
+        bool ctrlDown = GetAsyncKeyState(VK_CONTROL) & 0x8000;
+        bool qDown = GetAsyncKeyState('Q') & 0x8000;
+        if (ctrlDown && qDown) {
+          killSwitch = true;
+        }
+      }
+      t.join();
+    }
+}
+
+int displayCurrentDirectory() {
+    TCHAR pathBuffer[MAX_PATH];
+    DWORD length = GetCurrentDirectory(MAX_PATH, pathBuffer); // windows system call
+    if (length == 0) {
+      cerr << "Error getting current directory. Exiting Armadillo" << endl;
+      return -1;
+    }
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14); // yellow
+    cout << "ARDO";
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15); // white
+    cout << " => ";
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9); // blue
+    cout << pathBuffer;
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15); // white
+    cout << " => ";
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7); // light grey
+    return 1;
 }

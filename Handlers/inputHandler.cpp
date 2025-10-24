@@ -1,7 +1,13 @@
 #include "inputHandler.h"
 
-int inputHandler(const string& userInput) {
-    return -1;
+void inputHandler(const string& userInput) {
+    while (true) {
+        if (killSwitch == true) {
+          cout << "killing program" << endl;
+          break;
+        }
+    }
+    runningCommand = false;
 }
 
 vector<string> tokenizeInput(string inputString) {
