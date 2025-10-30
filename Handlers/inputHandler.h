@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 #include <windows.h>
+#include <thread>
+#include <chrono>
 
 #include "commandHandler.h"
 #include "pipeHandler.h"
