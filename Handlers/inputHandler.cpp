@@ -2,14 +2,19 @@
 
 bool containsPipe;
 
-void inputHandler(const string& userInput) {
-    containsPipe = false;
-    vector<string> tokens = tokenizeInput(userInput);
-    if (containsPipe) { displayOutput(pipeHandler(tokens)); }
-    else { displayOutput(commandHandler(tokens)); }
+
+void printBadCommandResult(const vector<string>& commandOutput) {
+  cerr << "    got:  [";
+  int size = commandOutput.size();
+  for (int i = 0; i < size; ++i) {
+    cerr << '"' << commandOutput[i] << '"';
+    if (i < size - 1) { cerr << ", "; }
+  }
+  cerr << "]" << endl;
 }
 
-void displayOutput(vector<string>& commandOutput) {
+
+void displayOutput(const vector<string>& commandOutput) {
     if (commandOutput.empty() or commandOutput.size() != 2) { // bad command
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 12); // red
         cerr << "ERROR: command output malformed." << endl;
@@ -47,17 +52,6 @@ void displayOutput(vector<string>& commandOutput) {
 }
 
 
-void printBadCommandResult(vector<string>& commandOutput) {
-  cerr << "    got:  [";
-  int size = commandOutput.size();
-  for (int i = 0; i < size; ++i) {
-    cerr << '"' << commandOutput[i] << '"';
-    if (i < size - 1) { cerr << ", "; }
-  }
-  cerr << "]" << endl;
-}
-
-
 vector<string> tokenizeInput(const string& inputString) {
     istringstream wordSeparator(inputString);
     vector<string> tokens;
@@ -74,10 +68,16 @@ vector<string> tokenizeInput(const string& inputString) {
             quotedToken.erase(quotedToken.size() - 1);
             if (quotedToken[quotedToken.size() - 1] == '"') {
               quotedToken.erase(quotedToken.size() - 1); } // removed trailing "
-            cout << quotedToken << endl;
             tokens.push_back(quotedToken);
         }
         else { tokens.push_back(token); }
     }
     return tokens;
+}
+
+void inputHandler(const string& userInput) {
+  containsPipe = false;
+  vector<string> tokens = tokenizeInput(userInput);
+  if (containsPipe) { displayOutput(pipeHandler(tokens)); }
+  else { displayOutput(commandHandler(tokens)); }
 }

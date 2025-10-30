@@ -12,11 +12,10 @@
 
 using namespace std;
 
-void inputHandler(const string& userInput) ;
+void printBadCommandResult(const vector<string>& commandOutput);
 
-void displayOutput(vector<string> commandOutput);
-
-void printBadCommandResult(vector<string>& commandOutput);
+void displayOutput(const vector<string>& commandOutput);
 
 vector<string> tokenizeInput(const string& inputString);
 
+void inputHandler(const string& userInput) ;
