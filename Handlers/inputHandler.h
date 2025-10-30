@@ -16,5 +16,7 @@ void inputHandler(const string& userInput) ;
 
 void displayOutput(vector<string> commandOutput);
 
-vector<string> tokenizeInput(const string& inputString) ;
+void printBadCommandResult(vector<string>& commandOutput);
+
+vector<string> tokenizeInput(const string& inputString);
 

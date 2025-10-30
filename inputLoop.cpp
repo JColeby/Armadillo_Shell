@@ -19,6 +19,7 @@ int inputLoop() {
     }
 }
 
+
 int displayCurrentDirectory() {
     TCHAR pathBuffer[MAX_PATH];
     DWORD length = GetCurrentDirectory(MAX_PATH, pathBuffer); // windows system call
