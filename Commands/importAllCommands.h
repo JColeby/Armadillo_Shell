@@ -4,3 +4,5 @@
 // #import "BuiltinCommands/ExampleCommand/<ClassName>"
 
 #include "BuiltinCommands/ExampleCommand/ExampleCommand.h"
+#include "BuiltinCommands/ExampleCommand2/ExampleCommand2.h"
+#include "BuiltinCommands/Run/Run.h"

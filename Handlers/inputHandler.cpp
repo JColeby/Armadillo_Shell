@@ -8,14 +8,13 @@ void inputHandler(const string& userInput) {
     vector<string> commandOutput;
     if (containsPipe) { displayOutput(pipeHandler(tokens)); }
     else { displayOutput(commandHandler(tokens)); }
-    runningCommand = false;
 }
 
 void displayOutput(vector<string> commandOutput) {
     if (commandOutput.empty() or commandOutput.size() != 2) { // bad command
         cerr << "ERROR: command output malformed." << endl;
         cerr << "    Command failed to return data to Armadillo in the following format: ";
-        cerr << R"(["Error/Output", "StatusCode"])" << endl;
+        cerr << R"(["ErrorMsg/Output", "StatusCode"])" << endl;
         cerr << "    got:  [";
         int size = commandOutput.size();
         for (int i = 0; i < size; ++i) {
@@ -33,7 +32,7 @@ void displayOutput(vector<string> commandOutput) {
     }
     else if (commandOutput[1][0] == '4') { // user error.
       SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
-      cout << "USER ERROR: " << commandOutput[0] << endl;
+      cout << "MALFORMED ERROR: " << commandOutput[0] << endl;
     }
     else if (commandOutput[1][0] == '5') { // command error
       SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 12);
@@ -48,7 +47,11 @@ void displayOutput(vector<string> commandOutput) {
       cerr << "    Command didn't return a valid error code: " << endl;
       cerr << "    got:  " << commandOutput[1] << endl;
     }
+    // waiting so we don't have stupid race condition with input loop when it displays the current directory
+    this_thread::sleep_for(chrono::milliseconds(1));
+    runningCommand = false;
 }
+
 
 vector<string> tokenizeInput(const string& inputString) {
     istringstream wordSeparator(inputString);
@@ -57,7 +60,16 @@ vector<string> tokenizeInput(const string& inputString) {
     // separating characters by whitespace
     while (wordSeparator >> token) {
         if (token == "|") { containsPipe = true; } // so we know to call pipeHandler
-        tokens.push_back(token);
+        if (token[0] == '"' and token[token.size() - 1] != '"') {
+            string quotedToken = token;
+            string word;
+            do {
+                wordSeparator >> word;
+                quotedToken += " " + word;
+            } while (word[word.size() - 1] != '"');
+            tokens.push_back(quotedToken);
+        }
+        else { tokens.push_back(token); }
     }
     return tokens;
 }
