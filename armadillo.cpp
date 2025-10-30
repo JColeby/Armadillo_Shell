@@ -16,7 +16,10 @@ int printTextFile(const string& filename) {
   return 0;
 }
 
+
+
 int main() {
+    system("cls");
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
     int success = printTextFile("Resources/armadilloASCII.txt");
     if (success == 1) {
@@ -35,7 +38,9 @@ int main() {
     cout << "##########################################################################################" << endl << endl;
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
     cout << "     -  press ctrl+q to terminate any active command" << endl << "     -  use 'exit' command to close the shell" << endl << endl;
-    return inputLoop();
+    int exitCode = inputLoop();
+    system("cls");
+    return exitCode;
 }
 
 
