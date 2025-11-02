@@ -6,3 +6,8 @@
 #include "BuiltinCommands/ExampleCommand/ExampleCommand.h"
 #include "BuiltinCommands/ExampleCommand2/ExampleCommand2.h"
 #include "BuiltinCommands/Run/Run.h"
+#include "BuiltinCommands/Edit/Edit.h"
+using std::string;
+using std::vector;
+using std::cout;
+using std::endl;

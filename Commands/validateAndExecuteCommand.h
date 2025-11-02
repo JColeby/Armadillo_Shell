@@ -6,7 +6,9 @@
 #include "Command.h"
 #include "importAllCommands.h"
 
-using namespace std;
+using std::is_base_of;
+using std::unique_ptr;
+
 
 template <typename T>
 std::unique_ptr<T> createInstance(vector<string>& tokenizedInput) {

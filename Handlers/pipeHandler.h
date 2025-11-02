@@ -6,6 +6,9 @@
 #include "commandHandler.h"
 
 
-using namespace std;
+using std::string;
+using std::vector;
+using std::cout;
+using std::endl;
 
 vector<string> pipeHandler(const vector<string>& tokenizedInput);

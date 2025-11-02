@@ -1,5 +1,7 @@
 #include "inputLoop.h"
 
+using std::cin;
+using std::thread;
 
 
 int inputLoop() {
@@ -8,6 +10,7 @@ int inputLoop() {
       string input;
       getline(cin, input);
       if (input == "exit") { return 0; } // exits the shell
+      if (input == "clear") { system("cls"); continue; }
       runningCommand = true;
       thread t(inputHandler, input);
       while (runningCommand) {

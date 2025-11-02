@@ -4,7 +4,12 @@
 #include <windows.h>
 #include "inputLoop.h"
 
-using namespace std;
+using std::string;
+using std::vector;
+using std::cout;
+using std::endl;
+using std::ifstream;
+
 
 int printTextFile(const string& filename) {
   if (ifstream file(filename); !file.is_open()) { return 1; }
@@ -15,7 +20,6 @@ int printTextFile(const string& filename) {
   }
   return 0;
 }
-
 
 
 int main() {
@@ -42,7 +46,4 @@ int main() {
     system("cls");
     return exitCode;
 }
-
-
-
 

@@ -10,7 +10,13 @@
 #include "commandHandler.h"
 #include "pipeHandler.h"
 
-using namespace std;
+using std::string;
+using std::vector;
+using std::cout;
+using std::endl;
+using std::cerr;
+
+
 
 void printBadCommandResult(const vector<string>& commandOutput);
 

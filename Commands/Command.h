@@ -4,8 +4,15 @@
 #include <vector>
 #include "../Globals/GlobalFlags.h"
 
-using namespace std;
-
+using std::string;
+using std::vector;
+using std::cout;
+using std::endl;
+using std::flush;
+using std::runtime_error;
+using std::exception;
+using std::ifstream;
+using std::ofstream;
 // ===================={ Command Parent }====================
 // Please don't modify this file unless you know what you are doing!
 

@@ -23,7 +23,9 @@ void displayOutput(const vector<string>& commandOutput) {
         printBadCommandResult(commandOutput);
     }
     else if (commandOutput[1][0] == '2') { // command ran successfully!
-        cout << commandOutput[0] << endl;
+        if (commandOutput[1] != "201") { // ran successfully, but no string should be printed
+          cout << commandOutput[0] << endl;
+        }
     }
     else if (commandOutput[1][0] == '3') { // unauthorized
       SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14); // yellow
@@ -47,13 +49,13 @@ void displayOutput(const vector<string>& commandOutput) {
       printBadCommandResult(commandOutput);
     }
     // waiting so we don't have stupid race condition with input loop when it displays the current directory
-    this_thread::sleep_for(chrono::milliseconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     runningCommand = false;
 }
 
 
 vector<string> tokenizeInput(const string& inputString) {
-    istringstream wordSeparator(inputString);
+    std::istringstream wordSeparator(inputString);
     vector<string> tokens;
     string token;
     // separating characters by whitespace
