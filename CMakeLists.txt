@@ -21,7 +21,6 @@ set(SHELL_SOURCES
 add_executable(OperatingSystemsFinal
         armadillo.cpp
         ${SHELL_SOURCES}
-        Commands/BuiltinCommands/Edit/Edit.h
 )
 
 # -----------------------
