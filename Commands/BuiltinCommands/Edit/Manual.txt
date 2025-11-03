@@ -1,6 +1,6 @@
 long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal.
 
-
+testing vertical changes
 
 
 
@@ -10,18 +10,9 @@ testing vertical changes
 
 
 
-testing vertical changes
-
-
-
-
-
-
-
 
 
 testing vertical changes
-
 
 
 
@@ -40,4 +31,3 @@ testing vertical changes
 
 
 
-testing vertical changes

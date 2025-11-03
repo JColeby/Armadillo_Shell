@@ -23,6 +23,9 @@ class Edit : public Command<Edit> {
   SHORT consoleHeight;
   int xOffset; // used to get the cursor and character positions inside screenBuffer
   int yOffset;
+  DWORD startingMode; // initial console state
+
+
 
 public:
   explicit Edit(vector<string>& tokens) {
@@ -38,7 +41,24 @@ public:
     inputConsoleHandle = GetStdHandle(STD_INPUT_HANDLE);
     outputConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
     updateScreenBufferInfo();
+    GetConsoleMode(inputConsoleHandle, &startingMode);
   }
+
+
+  ~Edit() {
+    SetConsoleMode(inputConsoleHandle, startingMode); // Restore console
+    FlushConsoleInputBuffer(inputConsoleHandle); // Flush any leftover input events
+
+    // Make sure the cursor is shown
+    CONSOLE_CURSOR_INFO cursorInfo;
+    HANDLE outputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    GetConsoleCursorInfo(outputHandle, &cursorInfo);
+    cursorInfo.bVisible = TRUE;
+    SetConsoleCursorInfo(outputHandle, &cursorInfo);
+
+    system("cls");
+  }
+
 
   static string returnManFilePath() {
     return "BuiltinCommands/Edit/Manual.txt";
@@ -50,9 +70,9 @@ public:
     return false;
   }
 
+
   vector<string> executeCommand() override {
     // Saving the current console mode so we can revert back to it later
-    DWORD startingMode;
     GetConsoleMode(inputConsoleHandle, &startingMode);
 
     //TODO: remove this after testing silly!
@@ -73,11 +93,13 @@ public:
       clearConsole();
 
       editFile();
+      FlushConsoleInputBuffer(inputConsoleHandle); // flushes out the console so we don't have issues when entering the program again
       SetConsoleMode(inputConsoleHandle, startingMode); // reverting back to normal
       system("cls");
       return status;
     }
     catch (const exception& e) {
+      FlushConsoleInputBuffer(inputConsoleHandle);
       SetConsoleMode(inputConsoleHandle, startingMode);
       return {e.what(), "500"};
     }
@@ -88,6 +110,7 @@ public:
 private:
 
   void updateScreenBufferInfo() {
+    outputConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE); // updates console handle just in case the screen changes
     GetConsoleScreenBufferInfo(outputConsoleHandle, &screenBuffer); // getting our screen buffer
     consoleWidth  = screenBuffer.dwSize.X;
     consoleHeight = screenBuffer.dwSize.Y;
@@ -116,10 +139,13 @@ private:
 
   // main loop. will continue until
   void editFile() {
+    FlushConsoleInputBuffer(inputConsoleHandle); // flushes the buffer so we don't pick up keys that were pressed before calling
+
     while (editLoopActive) {
       updateConsole();
+      updateConsoleOffset();
       status = {"Unknown Internal Error", "500"}; // just in case something goes wrong and status was overwritten
-      if (killSwitch) { killSwitchScreen(); }
+      // if (killSwitch) { killSwitchScreen(); }
       // Wait indefinitely for console input
       DWORD result = WaitForSingleObject(inputConsoleHandle, INFINITE); // will wait indefinitely until it detects user input
       if (result == WAIT_OBJECT_0) { // if user input was detected
@@ -139,28 +165,24 @@ private:
           switch (keyEvent.wVirtualKeyCode) {
             case VK_LEFT:
               if (fileX > 0) { fileX--; }
-              else if (fileY > 0) { fileY--; fileX = fileContent[fileY].size() - 1; }
-              updateConsoleOffset();
+              else if (fileY > 0) { fileY--; fileX = fileContent[fileY].size(); }
               break;
 
             case VK_RIGHT:
               if (fileX < fileContent[fileY].size()) { fileX++; }
               else if (fileY < fileContent.size() - 1) { fileY++; fileX = 0; }
-              updateConsoleOffset();
               break;
 
             case VK_UP:
               if (fileY > 0) { fileY--; }
               newCursorX = fileContent[fileY].size();
               if (fileX > newCursorX) { fileX = newCursorX; }
-              updateConsoleOffset();
               break;
 
             case VK_DOWN:
               if (fileY < fileContent.size() - 1) { fileY++; }
               newCursorX = fileContent[fileY].size();
               if (fileX > newCursorX) { fileX = newCursorX; }
-              updateConsoleOffset();
               break;
 
             case VK_RETURN:
@@ -170,18 +192,15 @@ private:
               fileY++;
               fileX = 0;
               saved = false;
-              updateConsoleOffset();
               break;
 
             case VK_BACK: // backspace
               deleteCharacter(fileX, fileY);
-              updateConsoleOffset();
               break;
 
             case VK_DELETE:
               if (fileX < fileContent[fileY].size()) { deleteCharacter(fileX + 1, fileY, false); }
               else if (fileY < fileContent.size() - 1) { fileY++; deleteCharacter(0, fileY, false); }
-              updateConsoleOffset();
               break;
 
             case VK_ESCAPE:
@@ -189,7 +208,8 @@ private:
               break;
 
             case 'S': // Ctrl+S
-              if (ctrlDown and !saved) {
+            case 's':
+              if (ctrlDown) {
                 try { saveBufferToFile(); saved = true; }
                 catch (string e) { editError(e); }
               }
@@ -197,18 +217,26 @@ private:
               break;
 
             case 'X': // Ctrl+x
+            case 'x':
               if (ctrlDown) { exitFilePrompt(); }
               else { writeCharToFileInfo(ch); }
               break;
 
             case 'Q': // Ctrl+q (detecting killSwitch because GetAsyncKeyState doesn't work with the current console mode)
-              if (ctrlDown) { exitFilePrompt(); }
+            case 'q':
+              if (ctrlDown) { killSwitchScreen(); }
               else { writeCharToFileInfo(ch); }
               break;
 
             default:
               writeCharToFileInfo(ch);
           }
+        }
+        else if (record.EventType == WINDOW_BUFFER_SIZE_EVENT) {
+          consoleWidth = record.Event.WindowBufferSizeEvent.dwSize.X;
+          consoleHeight = record.Event.WindowBufferSizeEvent.dwSize.Y;
+          system("cls");
+          updateConsole();
         }
       }
     }
@@ -259,7 +287,7 @@ private:
     for (SHORT y = 0; y < consoleHeight; y++) {
       for (SHORT x = 0; x < consoleWidth; x++) {
         CHAR_INFO& cell = buffer[y * consoleWidth + x]; // get buffer cell
-        if (y < (SHORT)(fileContent.size() - yOffset) && x < (SHORT)(fileContent[y].size() - xOffset)) { // verifying there is a corresponding char for the cell position
+        if (y < (SHORT)(fileContent.size() - yOffset) and x < (SHORT)(fileContent[y + yOffset].size() - xOffset)) { // verifying there is a corresponding char for the cell position
           cell.Char.AsciiChar = fileContent[y + yOffset][x + xOffset]; // set buffer cell to the correct ascii character
         } else { cell.Char.AsciiChar = ' '; }
         cell.Attributes = screenBuffer.wAttributes;
@@ -352,7 +380,7 @@ private:
 
   // will return one of the keys in the provided vector when it is pressed. Will wait until one of the keys is pressed
   int returnKeyPress(vector<int> keys, bool anyKey=false) {
-    FlushConsoleInputBuffer(inputConsoleHandle); // flushes the buffer so we don't pick up keys that were pressed before calling
+    // FlushConsoleInputBuffer(inputConsoleHandle); // flushes the buffer so we don't pick up keys that were pressed before calling
 
     while (true) { // code is the same as what's in editFile. Look there for more information
       DWORD result = WaitForSingleObject(inputConsoleHandle, INFINITE);

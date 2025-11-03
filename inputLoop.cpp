@@ -19,6 +19,7 @@ int inputLoop() {
         if (ctrlDown && qDown) { killSwitch = true; }
       }
       t.join();
+      killSwitch = false;
     }
 }
 
