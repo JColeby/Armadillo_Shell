@@ -209,6 +209,7 @@ private:
 
             case 'S': // Ctrl+S
             case 's':
+            case 19: // because apparently that returns the ascii code 19
               if (ctrlDown) {
                 try { saveBufferToFile(); saved = true; }
                 catch (string e) { editError(e); }
