@@ -49,7 +49,7 @@ void displayOutput(const vector<string>& commandOutput) {
     printBadCommandResult(commandOutput);
   }
   // waiting so we don't have stupid race condition with input loop when it displays the current directory
-  std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
   runningCommand = false;
 }
 

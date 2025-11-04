@@ -26,12 +26,15 @@ int printTextFile(const string& filename) {
 
 
 int main() {
+    // this allows us to make fancy terminal output by enabling ENABLE_VIRTUAL_TERMINAL_PROCESSING
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD dwMode = 0;
     GetConsoleMode(hOut, &dwMode);
     dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     SetConsoleMode(hOut, dwMode);
-    cout << CLEAR_SCREEN;
+
+    // printing out ascii art and shell information
+    system("cls");
     cout << YELLOW;
     int success = printTextFile("Resources/armadilloASCII.txt");
     if (success == 1) {
@@ -53,7 +56,7 @@ int main() {
     cout << "     -  press ctrl+q to terminate any active command" << endl
          << "     -  use 'exit' command to close the shell" << endl << endl;
     int exitCode = inputLoop();
-    cout << CLEAR_SCREEN << CURSOR_TOP_LEFT;
+    system("cls");
 
     return exitCode;
 }

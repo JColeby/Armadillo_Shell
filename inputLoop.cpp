@@ -13,13 +13,13 @@ int inputLoop() {
       string input;
       getline(cin, input);
       if (input == "exit") { return 0; } // exits the shell
-      if (input == "clear") { system("cls"); continue; }
       runningCommand = true;
       thread t(inputHandler, input);
       while (runningCommand) {
         bool ctrlDown = GetAsyncKeyState(VK_CONTROL) & 0x8000; // 0x8000 means the key is currently being pressed
         bool qDown = GetAsyncKeyState('Q') & 0x8000;
         if (ctrlDown && qDown) { killSwitch = true; }
+
       }
       t.join();
       killSwitch = false;

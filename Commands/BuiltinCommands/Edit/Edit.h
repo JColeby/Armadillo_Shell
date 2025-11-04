@@ -76,23 +76,23 @@ public:
     GetConsoleMode(inputConsoleHandle, &startingMode);
 
     //TODO: remove this after testing silly!
-    tokenizedCommand = {"Commands/BuiltinCommands/Edit/Manual.txt"};
+    if (tokenizedCommand[0] == "t") { tokenizedCommand = {"Commands/BuiltinCommands/Edit/Manual.txt"}; }
 
     try {
       if (std::filesystem::exists(tokenizedCommand[0])) { readFileToBuffer(); } // if file already exists
-      else { saved = false; throw runtime_error("test File was not detected!");} // if there isn't an existing file
-      if (fileContent.empty()) fileContent.push_back("");
+      else { saved = false; } // if there isn't an existing file
+      if (fileContent.empty()) { fileContent.push_back(""); }
       
       // setting up the terminal for editing
       // disabling ENABLE_LINE_INPUT prevents the editor from automatically processing newline characters.
       // disabling ENABLE_ECHO_INPUT means we have to control how input is displayed to the terminal, which gives us more control
-      DWORD newMode = startingMode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS);
+      DWORD newMode = startingMode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
       SetConsoleMode(inputConsoleHandle, newMode);
 
       updateScreenBufferInfo();
       clearConsole();
-
       editFile();
+
       FlushConsoleInputBuffer(inputConsoleHandle); // flushes out the console so we don't have issues when entering the program again
       SetConsoleMode(inputConsoleHandle, startingMode); // reverting back to normal
       system("cls");
@@ -109,12 +109,7 @@ public:
 
 private:
 
-  void updateScreenBufferInfo() {
-    outputConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE); // updates console handle just in case the screen changes
-    GetConsoleScreenBufferInfo(outputConsoleHandle, &screenBuffer); // getting our screen buffer
-    consoleWidth  = screenBuffer.dwSize.X;
-    consoleHeight = screenBuffer.dwSize.Y;
-  }
+  // ===================={ Code for reading/writing to file }====================
 
   // reads in the file and saves it to our buffer
   void readFileToBuffer() {
@@ -137,6 +132,8 @@ private:
   }
 
 
+  // ===================={ Code for the main loop }====================
+
   // main loop. will continue until
   void editFile() {
     FlushConsoleInputBuffer(inputConsoleHandle); // flushes the buffer so we don't pick up keys that were pressed before calling
@@ -156,14 +153,13 @@ private:
 
         if (record.EventType == KEY_EVENT && record.Event.KeyEvent.bKeyDown) { // if the event was a key down action
           KEY_EVENT_RECORD keyEvent = record.Event.KeyEvent;
-          keyEventOptions(keyEvent);
+          keyEventOptions(keyEvent); // switch statement below
         }
 
-        else if (record.EventType == WINDOW_BUFFER_SIZE_EVENT) {
+        else if (record.EventType == WINDOW_BUFFER_SIZE_EVENT) {  // if you resize the terminal window
           consoleWidth = record.Event.WindowBufferSizeEvent.dwSize.X;
           consoleHeight = record.Event.WindowBufferSizeEvent.dwSize.Y;
           system("cls");
-          updateConsole();
         }
       }
     }
@@ -225,11 +221,11 @@ private:
         PeekConsoleInput(inputConsoleHandle, &record, 1, &eventsRead); // look at the next item in the buffer to see what it is
 
         if (record.EventType == KEY_EVENT && record.Event.KeyEvent.bKeyDown) {
-          ReadConsoleInput(inputConsoleHandle, &record, 1, &eventsRead);
+          ReadConsoleInput(inputConsoleHandle, &record, 1, &eventsRead); // read in from the buffer so we don't pick up another character
           KEY_EVENT_RECORD secondKeyEvent = record.Event.KeyEvent;
 
           switch (secondKeyEvent.wVirtualKeyCode) {
-            case 'X': case 'x':
+            case 'X': case 'x': // Ctrl+x
               exitFilePrompt();
               break;
 
@@ -246,10 +242,53 @@ private:
           catch (string& e) { editError(e); }
         } break;
 
-
       default:
         writeCharToFileInfo(ch);
     }
+  }
+
+
+
+  // ===================={ Code for file changes/edits }====================
+
+
+  // deletes character left of this position. used for both backspace and delete button events.
+  void deleteCharacter(int charX, int charY, bool updatePosition=true) {
+    if (charX > 0) { // deleting normal character
+      fileContent[charY].erase(charX - 1, 1);
+      if (updatePosition) { fileX--; } // position should only update when backspace is pressed
+    }
+    else if (charY > 0) { // deleting newline
+      int previousLine = fileContent[charY - 1].size();
+      fileContent[charY - 1] += fileContent[fileY];
+      fileContent.erase(fileContent.begin() + fileY);
+      fileY--;
+      if (updatePosition) {
+        fileX = previousLine;
+      }
+    }
+    saved = false;
+  }
+
+
+  void writeCharToFileInfo(char ch) {
+    if (ch >= 32 and ch <= 126) {
+      fileContent[fileY].insert(fileX, 1, ch);
+      fileX++;
+      saved = false;
+    }
+  }
+
+
+
+  // ===================={ Code for console changes/updates }====================
+
+
+  void updateScreenBufferInfo() {
+    outputConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE); // updates console handle just in case the screen changes
+    GetConsoleScreenBufferInfo(outputConsoleHandle, &screenBuffer); // getting our screen buffer
+    consoleWidth  = screenBuffer.dwSize.X;
+    consoleHeight = screenBuffer.dwSize.Y;
   }
 
 
@@ -262,15 +301,6 @@ private:
     while (fileY >= yOffset + consoleHeight) { yOffset = fileY - consoleHeight + 1; }
     if (xOffset < 0) xOffset = 0;
     if (yOffset < 0) yOffset = 0;
-  }
-
-
-  void writeCharToFileInfo(char ch) {
-    if (ch >= 32 and ch <= 126) {
-      fileContent[fileY].insert(fileX, 1, ch);
-      fileX++;
-      saved = false;
-    }
   }
 
 
@@ -316,25 +346,6 @@ private:
   }
 
 
-  // deletes character left of this position. used for both backspace and delete button events.
-  void deleteCharacter(int charX, int charY, bool updatePosition=true) {
-    if (charX > 0) { // deleting normal character
-      fileContent[charY].erase(charX - 1, 1);
-      if (updatePosition) { fileX--; } // position should only update when backspace is pressed
-    }
-    else if (charY > 0) { // deleting newline
-      int previousLine = fileContent[charY - 1].size();
-      fileContent[charY - 1] += fileContent[fileY];
-      fileContent.erase(fileContent.begin() + fileY);
-      fileY--;
-      if (updatePosition) {
-        fileX = previousLine;
-      }
-    }
-    saved = false;
-  }
-
-
 
   // ===================={ Code for user prompts }====================
 
@@ -347,7 +358,6 @@ private:
     cursorInfo.bVisible = FALSE; // making the cursor invisible
     SetConsoleCursorInfo(outputConsoleHandle, &cursorInfo);
   }
-
 
 
   // prompt that will be shown if a user tries to exit
