@@ -86,7 +86,7 @@ public:
       // setting up the terminal for editing
       // disabling ENABLE_LINE_INPUT prevents the editor from automatically processing newline characters.
       // disabling ENABLE_ECHO_INPUT means we have to control how input is displayed to the terminal, which gives us more control
-      DWORD newMode = startingMode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
+      DWORD newMode = startingMode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS);
       SetConsoleMode(inputConsoleHandle, newMode);
 
       updateScreenBufferInfo();
@@ -140,8 +140,8 @@ private:
   // main loop. will continue until
   void editFile() {
     FlushConsoleInputBuffer(inputConsoleHandle); // flushes the buffer so we don't pick up keys that were pressed before calling
-
     while (editLoopActive) {
+      //FlushConsoleInputBuffer(inputConsoleHandle);
       updateConsole();
       updateConsoleOffset();
       status = {"Unknown Internal Error", "500"}; // just in case something goes wrong and status was overwritten
@@ -156,83 +156,9 @@ private:
 
         if (record.EventType == KEY_EVENT && record.Event.KeyEvent.bKeyDown) { // if the event was a key down action
           KEY_EVENT_RECORD keyEvent = record.Event.KeyEvent;
-          char ch = keyEvent.uChar.AsciiChar; // get the character of the key that was pressed
-          bool ctrlDown = keyEvent.dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED); // detecting if ctrl was also pressed
-
-          int newCursorX; // for when we have to update cursorY
-          string supportLine; // for dealing with newline changes
-
-          switch (keyEvent.wVirtualKeyCode) {
-            case VK_LEFT:
-              if (fileX > 0) { fileX--; }
-              else if (fileY > 0) { fileY--; fileX = fileContent[fileY].size(); }
-              break;
-
-            case VK_RIGHT:
-              if (fileX < fileContent[fileY].size()) { fileX++; }
-              else if (fileY < fileContent.size() - 1) { fileY++; fileX = 0; }
-              break;
-
-            case VK_UP:
-              if (fileY > 0) { fileY--; }
-              newCursorX = fileContent[fileY].size();
-              if (fileX > newCursorX) { fileX = newCursorX; }
-              break;
-
-            case VK_DOWN:
-              if (fileY < fileContent.size() - 1) { fileY++; }
-              newCursorX = fileContent[fileY].size();
-              if (fileX > newCursorX) { fileX = newCursorX; }
-              break;
-
-            case VK_RETURN:
-              supportLine = fileContent[fileY].substr(fileX);
-              fileContent[fileY] = fileContent[fileY].substr(0, fileX);
-              fileContent.insert(fileContent.begin() + fileY + 1, supportLine);
-              fileY++;
-              fileX = 0;
-              saved = false;
-              break;
-
-            case VK_BACK: // backspace
-              deleteCharacter(fileX, fileY);
-              break;
-
-            case VK_DELETE:
-              if (fileX < fileContent[fileY].size()) { deleteCharacter(fileX + 1, fileY, false); }
-              else if (fileY < fileContent.size() - 1) { fileY++; deleteCharacter(0, fileY, false); }
-              break;
-
-            case VK_ESCAPE:
-              exitFilePrompt();
-              break;
-
-            case 'S': // Ctrl+S
-            case 's':
-            case 19: // because apparently that returns the ascii code 19
-              if (ctrlDown) {
-                try { saveBufferToFile(); saved = true; }
-                catch (string e) { editError(e); }
-              }
-              else { writeCharToFileInfo(ch); }
-              break;
-
-            case 'X': // Ctrl+x
-            case 'x':
-              if (ctrlDown) { exitFilePrompt(); }
-              else { writeCharToFileInfo(ch); }
-              break;
-
-            case 'Q': // Ctrl+q (detecting killSwitch because GetAsyncKeyState doesn't work with the current console mode)
-            case 'q':
-              if (ctrlDown) { killSwitchScreen(); }
-              else { writeCharToFileInfo(ch); }
-              break;
-
-            default:
-              writeCharToFileInfo(ch);
-          }
+          keyEventOptions(keyEvent);
         }
+
         else if (record.EventType == WINDOW_BUFFER_SIZE_EVENT) {
           consoleWidth = record.Event.WindowBufferSizeEvent.dwSize.X;
           consoleHeight = record.Event.WindowBufferSizeEvent.dwSize.Y;
@@ -240,6 +166,89 @@ private:
           updateConsole();
         }
       }
+    }
+  }
+
+  void keyEventOptions(KEY_EVENT_RECORD keyEvent) {
+    char ch = keyEvent.uChar.AsciiChar; // get the character of the key that was pressed
+    int newCursorX; // for when we have to update cursorY
+    string supportLine; // for dealing with newline changes
+
+    switch (keyEvent.wVirtualKeyCode) {
+      case VK_LEFT:
+        if (fileX > 0) { fileX--; }
+        else if (fileY > 0) { fileY--; fileX = fileContent[fileY].size(); }
+        break;
+
+      case VK_RIGHT:
+        if (fileX < fileContent[fileY].size()) { fileX++; }
+        else if (fileY < fileContent.size() - 1) { fileY++; fileX = 0; }
+        break;
+
+      case VK_UP:
+        if (fileY > 0) { fileY--; }
+        newCursorX = fileContent[fileY].size();
+        if (fileX > newCursorX) { fileX = newCursorX; }
+        break;
+
+      case VK_DOWN:
+        if (fileY < fileContent.size() - 1) { fileY++; }
+        newCursorX = fileContent[fileY].size();
+        if (fileX > newCursorX) { fileX = newCursorX; }
+        break;
+
+      case VK_RETURN:
+        supportLine = fileContent[fileY].substr(fileX);
+        fileContent[fileY] = fileContent[fileY].substr(0, fileX);
+        fileContent.insert(fileContent.begin() + fileY + 1, supportLine);
+        fileY++;
+        fileX = 0;
+        saved = false;
+        break;
+
+      case VK_BACK: // backspace
+        deleteCharacter(fileX, fileY);
+        break;
+
+      case VK_DELETE:
+        if (fileX < fileContent[fileY].size()) { deleteCharacter(fileX + 1, fileY, false); }
+        else if (fileY < fileContent.size() - 1) { fileY++; deleteCharacter(0, fileY, false); }
+        break;
+
+      case VK_ESCAPE:
+        exitFilePrompt();
+        break;
+
+      case VK_CONTROL:
+        INPUT_RECORD record;
+        DWORD eventsRead;
+        PeekConsoleInput(inputConsoleHandle, &record, 1, &eventsRead); // look at the next item in the buffer to see what it is
+
+        if (record.EventType == KEY_EVENT && record.Event.KeyEvent.bKeyDown) {
+          ReadConsoleInput(inputConsoleHandle, &record, 1, &eventsRead);
+          KEY_EVENT_RECORD secondKeyEvent = record.Event.KeyEvent;
+
+          switch (secondKeyEvent.wVirtualKeyCode) {
+            case 'X': case 'x':
+              exitFilePrompt();
+              break;
+
+            case 'Q': case 'q': // Ctrl+q (detecting killSwitch because GetAsyncKeyState doesn't really work with how I set things up)
+              killSwitchScreen();
+              break;
+
+            default: // undefined
+              break;
+          }
+        }
+        else { // ctrl+s  because the windows console is stupid and only returns a ctrl event instead of another letter like the others
+          try { saveBufferToFile(); saved = true; }   // still experiencing a bug where the next input in the buffer after ctrl+s gets consumed
+          catch (string& e) { editError(e); }
+        } break;
+
+
+      default:
+        writeCharToFileInfo(ch);
     }
   }
 
@@ -286,6 +295,14 @@ private:
     vector<CHAR_INFO> buffer(consoleWidth * consoleHeight); // Offscreen buffer that will be pushed to the screen
 
     for (SHORT y = 0; y < consoleHeight; y++) {
+      // if (fileContent.size() - 1 > y ) {
+      //   for (SHORT x = 0; x < std::to_string(y).size(); x++) {
+      //     CHAR_INFO& cell = buffer[y * consoleWidth + x];
+      //     cell.Char.AsciiChar = std::to_string(y)[x];
+      //     cell.Attributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; // dark grey
+      //   }
+      // }
+
       for (SHORT x = 0; x < consoleWidth; x++) {
         CHAR_INFO& cell = buffer[y * consoleWidth + x]; // get buffer cell
         if (y < (SHORT)(fileContent.size() - yOffset) and x < (SHORT)(fileContent[y + yOffset].size() - xOffset)) { // verifying there is a corresponding char for the cell position

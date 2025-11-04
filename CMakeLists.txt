@@ -13,6 +13,7 @@ set(SHELL_SOURCES
         Handlers/pipeHandler.cpp
         Globals/GlobalFlags.cpp
         inputLoop.cpp
+        TerminalFormatting.h
 )
 
 # -----------------------

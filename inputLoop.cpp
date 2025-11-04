@@ -1,7 +1,10 @@
 #include "inputLoop.h"
+#include "TerminalFormatting.h"
 
 using std::cin;
 using std::thread;
+
+using namespace VT;
 
 
 int inputLoop() {
@@ -31,14 +34,10 @@ int displayCurrentDirectory() {
       cerr << "FATAL ERROR: failed to fetch current directory. Exiting Armadillo" << endl;
       return -1;
     }
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14); // yellow
-    cout << "ARDO";
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15); // white
-    cout << " => ";
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9); // blue
-    cout << pathBuffer;
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15); // white
-    cout << " => ";
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7); // light grey
+    cout << YELLOW << "ARDO"
+         << WHITE  << " => "
+         << CYAN << pathBuffer
+         << WHITE << " => "
+         << WHITE; // light grey (closest equivalent)
     return 1;
 }
