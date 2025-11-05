@@ -45,7 +45,7 @@ public:
   }
 
 
-  ~Edit() {
+  ~Edit() override {
     SetConsoleMode(inputConsoleHandle, startingMode); // Restore console
     FlushConsoleInputBuffer(inputConsoleHandle); // Flush any leftover input events
 
@@ -82,11 +82,12 @@ public:
       if (std::filesystem::exists(tokenizedCommand[0])) { readFileToBuffer(); } // if file already exists
       else { saved = false; } // if there isn't an existing file
       if (fileContent.empty()) { fileContent.push_back(""); }
-      
+
       // setting up the terminal for editing
       // disabling ENABLE_LINE_INPUT prevents the editor from automatically processing newline characters.
       // disabling ENABLE_ECHO_INPUT means we have to control how input is displayed to the terminal, which gives us more control
       DWORD newMode = startingMode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
+      newMode |= ENABLE_MOUSE_INPUT;
       SetConsoleMode(inputConsoleHandle, newMode);
 
       updateScreenBufferInfo();
@@ -138,12 +139,11 @@ private:
   void editFile() {
     FlushConsoleInputBuffer(inputConsoleHandle); // flushes the buffer so we don't pick up keys that were pressed before calling
     while (editLoopActive) {
-      //FlushConsoleInputBuffer(inputConsoleHandle);
+
       updateConsole();
       updateConsoleOffset();
       status = {"Unknown Internal Error", "500"}; // just in case something goes wrong and status was overwritten
-      // if (killSwitch) { killSwitchScreen(); }
-      // Wait indefinitely for console input
+      // Waiting for console input
       DWORD result = WaitForSingleObject(inputConsoleHandle, INFINITE); // will wait indefinitely until it detects user input
       if (result == WAIT_OBJECT_0) { // if user input was detected
 
@@ -151,7 +151,7 @@ private:
         DWORD eventsRead; // stores the number of events actually read. Only needed for ReadConsoleInput
         ReadConsoleInput(inputConsoleHandle, &record, 1, &eventsRead); // Reads in the first input event
 
-        if (record.EventType == KEY_EVENT && record.Event.KeyEvent.bKeyDown) { // if the event was a key down action
+        if (record.EventType == KEY_EVENT and record.Event.KeyEvent.bKeyDown) { // if the event was a key down action
           KEY_EVENT_RECORD keyEvent = record.Event.KeyEvent;
           keyEventOptions(keyEvent); // switch statement below
         }
@@ -160,6 +160,16 @@ private:
           consoleWidth = record.Event.WindowBufferSizeEvent.dwSize.X;
           consoleHeight = record.Event.WindowBufferSizeEvent.dwSize.Y;
           system("cls");
+        }
+
+        else if (record.EventType == MOUSE_EVENT) { // currently not working. Will either look into it more or forget about it
+          MOUSE_EVENT_RECORD mouseEvent = record.Event.MouseEvent;
+          if (mouseEvent.dwEventFlags == 0 and (mouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED)) { // Left click
+            COORD mousePos = mouseEvent.dwMousePosition;
+            fileX = mousePos.X + xOffset;
+            fileY = mousePos.Y + yOffset;
+            updateCursor();
+          }
         }
       }
     }
@@ -170,81 +180,104 @@ private:
     int newCursorX; // for when we have to update cursorY
     string supportLine; // for dealing with newline changes
 
-    switch (keyEvent.wVirtualKeyCode) {
-      case VK_LEFT:
-        if (fileX > 0) { fileX--; }
-        else if (fileY > 0) { fileY--; fileX = fileContent[fileY].size(); }
-        break;
+    if (keyEvent.dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) {
+      switch (keyEvent.wVirtualKeyCode) {
+        case 'X': case 'x': // Ctrl+x
+          exitFilePrompt();
+          break;
 
-      case VK_RIGHT:
-        if (fileX < fileContent[fileY].size()) { fileX++; }
-        else if (fileY < fileContent.size() - 1) { fileY++; fileX = 0; }
-        break;
+        case 'Q': case 'q': // Ctrl+q (detecting killSwitch because GetAsyncKeyState doesn't really work with how I set things up)
+          killSwitchScreen();
+          break;
 
-      case VK_UP:
-        if (fileY > 0) { fileY--; }
-        newCursorX = fileContent[fileY].size();
-        if (fileX > newCursorX) { fileX = newCursorX; }
-        break;
-
-      case VK_DOWN:
-        if (fileY < fileContent.size() - 1) { fileY++; }
-        newCursorX = fileContent[fileY].size();
-        if (fileX > newCursorX) { fileX = newCursorX; }
-        break;
-
-      case VK_RETURN:
-        supportLine = fileContent[fileY].substr(fileX);
-        fileContent[fileY] = fileContent[fileY].substr(0, fileX);
-        fileContent.insert(fileContent.begin() + fileY + 1, supportLine);
-        fileY++;
-        fileX = 0;
-        saved = false;
-        break;
-
-      case VK_BACK: // backspace
-        deleteCharacter(fileX, fileY);
-        break;
-
-      case VK_DELETE:
-        if (fileX < fileContent[fileY].size()) { deleteCharacter(fileX + 1, fileY, false); }
-        else if (fileY < fileContent.size() - 1) { fileY++; deleteCharacter(0, fileY, false); }
-        break;
-
-      case VK_ESCAPE:
-        exitFilePrompt();
-        break;
-
-      case VK_CONTROL:
-        INPUT_RECORD record;
-        DWORD eventsRead;
-        PeekConsoleInput(inputConsoleHandle, &record, 1, &eventsRead); // look at the next item in the buffer to see what it is
-
-        if (record.EventType == KEY_EVENT && record.Event.KeyEvent.bKeyDown) {
-          ReadConsoleInput(inputConsoleHandle, &record, 1, &eventsRead); // read in from the buffer so we don't pick up another character
-          KEY_EVENT_RECORD secondKeyEvent = record.Event.KeyEvent;
-
-          switch (secondKeyEvent.wVirtualKeyCode) {
-            case 'X': case 'x': // Ctrl+x
-              exitFilePrompt();
-              break;
-
-            case 'Q': case 'q': // Ctrl+q (detecting killSwitch because GetAsyncKeyState doesn't really work with how I set things up)
-              killSwitchScreen();
-              break;
-
-            default: // undefined
-              break;
-          }
-        }
-        else { // ctrl+s  because the windows console is stupid and only returns a ctrl event instead of another letter like the others
-          try { saveBufferToFile(); saved = true; }   // still experiencing a bug where the next input in the buffer after ctrl+s gets consumed
+        case 'O': case 'o': // saves the file. I gave up on ctrl+s because windows is f***ing stupid and inconsistent
+          try { saveBufferToFile(); saved = true; }
           catch (string& e) { editError(e); }
-        } break;
+          break;
 
-      default:
-        writeCharToFileInfo(ch);
+        default:
+          break;
+      }
     }
+    else {
+      switch (keyEvent.wVirtualKeyCode) {
+        case VK_LEFT:
+          if (fileX > 0) { fileX--; }
+          else if (fileY > 0) { fileY--; fileX = (int)fileContent[fileY].size(); }
+          break;
+
+        case VK_RIGHT:
+          if (fileX < fileContent[fileY].size()) { fileX++; }
+          else if (fileY < fileContent.size() - 1) { fileY++; fileX = 0; }
+          break;
+
+        case VK_UP:
+          if (fileY > 0) { fileY--; }
+          newCursorX = (int)fileContent[fileY].size();
+          if (fileX > newCursorX) { fileX = newCursorX; }
+          break;
+
+        case VK_DOWN:
+          if (fileY < fileContent.size() - 1) { fileY++; }
+          newCursorX = (int)fileContent[fileY].size();
+          if (fileX > newCursorX) { fileX = newCursorX; }
+          break;
+
+        case VK_RETURN:
+          supportLine = fileContent[fileY].substr(fileX);
+          fileContent[fileY] = fileContent[fileY].substr(0, fileX);
+          fileContent.insert(fileContent.begin() + fileY + 1, supportLine);
+          fileY++;
+          fileX = 0;
+          saved = false;
+          break;
+
+        case VK_BACK: // backspace
+          deleteCharacter(fileX, fileY);
+          break;
+
+        case VK_DELETE:
+          if (fileX < fileContent[fileY].size()) { deleteCharacter(fileX + 1, fileY, false); }
+          else if (fileY < fileContent.size() - 1) { fileY++; deleteCharacter(0, fileY, false); }
+          break;
+
+        case VK_ESCAPE:
+          exitFilePrompt();
+          break;
+
+        // case VK_CONTROL:
+        //   INPUT_RECORD record;
+        //   DWORD eventsRead;
+        //   PeekConsoleInput(inputConsoleHandle, &record, 1, &eventsRead); // look at the next item in the buffer to see what it is
+        //
+        //   if (record.EventType == KEY_EVENT and record.Event.KeyEvent.bKeyDown) {
+        //     ReadConsoleInput(inputConsoleHandle, &record, 1, &eventsRead); // read in from the buffer so we don't pick up another character
+        //     KEY_EVENT_RECORD secondKeyEvent = record.Event.KeyEvent;
+        //
+        //     switch (secondKeyEvent.wVirtualKeyCode) {
+        //       case 'X': case 'x': // Ctrl+x
+        //         exitFilePrompt();
+        //         break;
+        //
+        //       case 'Q': case 'q': // Ctrl+q (detecting killSwitch because GetAsyncKeyState doesn't really work with how I set things up)
+        //         killSwitchScreen();
+        //         break;
+        //
+        //       default: // undefined
+        //         break;
+        //     }
+        //   }
+        //   else { // ctrl+s  because the windows console is stupid and only returns a ctrl event instead of another letter like the others
+        //     try { saveBufferToFile(); saved = true; }   // still experiencing a bug where the next input in the buffer after ctrl+s gets consumed
+        //     catch (string& e) { editError(e); }
+        //   } break;
+
+        default:
+          writeCharToFileInfo(ch);
+      }
+    }
+
+
   }
 
 
@@ -259,7 +292,7 @@ private:
       if (updatePosition) { fileX--; } // position should only update when backspace is pressed
     }
     else if (charY > 0) { // deleting newline
-      int previousLine = fileContent[charY - 1].size();
+      int previousLine = (int)fileContent[charY - 1].size();
       fileContent[charY - 1] += fileContent[fileY];
       fileContent.erase(fileContent.begin() + fileY);
       fileY--;
@@ -367,7 +400,7 @@ private:
       cout << "You have unsaved changes. Do you want to save before exiting?" << "\n";
       cout << "Yes[y], No[n], Cancel[c]" << "\n";
       cout << flush;
-      char keyPressed = tolower(returnKeyPress({'y', 'n', 'c'}));
+      char keyPressed = (char)tolower(returnKeyPress({'y', 'n', 'c'}));
       if (keyPressed == 'c') { return; }
       if (keyPressed == 'y') {
         try { saveBufferToFile(); saved = true; }
@@ -421,8 +454,8 @@ private:
           char ch = keyEvent.uChar.AsciiChar;
 
           if (anyKey) { return record.Event.KeyEvent.wVirtualKeyCode; } // returns the key that was pressed if anyKey is True
-          for (int i = 0; i < keys.size(); i++) {
-            if (tolower(ch) == tolower((char)keys[i])) return ch; // use tolower so the keys are still detected if uppercase
+          for (int key : keys) {
+            if (tolower(ch) == tolower((char)key)) return ch; // use tolower so the keys are still detected if uppercase
           }
         }
       }
