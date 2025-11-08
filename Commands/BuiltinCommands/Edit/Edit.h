@@ -76,7 +76,7 @@ public:
     GetConsoleMode(inputConsoleHandle, &startingMode);
 
     //TODO: remove this after testing silly!
-    if (tokenizedCommand[0] == "t") { tokenizedCommand = {"Commands/BuiltinCommands/Edit/Manual.txt"}; }
+    if (tokenizedCommand[0] == "t") { tokenizedCommand = {"Commands/BuiltinCommands/Edit/testing.txt"}; }
 
     try {
       if (std::filesystem::exists(tokenizedCommand[0])) { readFileToBuffer(); } // if file already exists

@@ -1,33 +1,13 @@
-long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long textdding more here
-long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long textdding more here
-long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long textdding more here
-long text horizontal. long text horizontal. long text horizontal. long text 
+Edit Command:
 
+    Syntax:
+        edit <filepath>
 
+    How to use:
+        use arrow keys to move cursor
+        ctrl+x - exits the document. will prompt you to save if needed
+        ctrl+o - saves the file. unfortunately ctrl+s wouldn't work because windows is silly
 
-
-long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long textdding more here
-long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long textdding more here
-long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long textdding more here
-long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long textdding more here
-long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long textdding more here
-long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long text horizontal. long textdding more here
-
-
-
-
-
-
-
-
-
-testing vertical changes
-
-
-save these changes
-
-
-testing vertical changes
-
-
-testing vertical changes
+    Additional info:
+        if the provided filepath doesn't exist, a new file will be created at that location the next time you save.
+        killing the command using ctrl+q will show the same prompts as ctrl+x before you exit.

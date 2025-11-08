@@ -7,6 +7,7 @@
 #include "BuiltinCommands/ExampleCommand2/ExampleCommand2.h"
 #include "BuiltinCommands/Run/Run.h"
 #include "BuiltinCommands/Edit/Edit.h"
+#include "BuiltinCommands/Process/Process.h"
 using std::string;
 using std::vector;
 using std::cout;
