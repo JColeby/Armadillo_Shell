@@ -1,10 +1,10 @@
 Process Command:
-    will show all the processes currently running. Will by default hide processes that are running the same executable as
-    another process so only one is shown.
+    will show all the processes currently running.
 
     Syntax:
         process <flags>
 
     Flags:
-        -a      Will show all processes that are running (i.e. doesn't hide processes that are running the same executable)
+        -h      hides duplicate processes that are from the same executable
         -f      displays the full filepath
+        -p      displays performance information instead

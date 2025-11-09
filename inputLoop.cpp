@@ -19,7 +19,6 @@ int inputLoop() {
         bool ctrlDown = GetAsyncKeyState(VK_CONTROL) & 0x8000; // 0x8000 means the key is currently being pressed
         bool qDown = GetAsyncKeyState('Q') & 0x8000;
         if (ctrlDown && qDown) { killSwitch = true; }
-
       }
       t.join();
       killSwitch = false;
@@ -38,6 +37,6 @@ int displayCurrentDirectory() {
          << WHITE  << " => "
          << CYAN << pathBuffer
          << WHITE << " => "
-         << WHITE; // light grey (closest equivalent)
+         << DEFAULT; // light grey (closest equivalent)
     return 1;
 }

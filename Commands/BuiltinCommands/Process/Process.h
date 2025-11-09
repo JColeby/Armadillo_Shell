@@ -15,27 +15,28 @@ using namespace VT;
 using std::to_string;
 
 
-// ===================={ Command Template }====================
-// TODO: DO NOT MODIFY THIS FILE DIRECTLY!!! Copy the contents of this file into a new header file
-// TODO: Please add test code! This will make it easier to debug the shell when making changes that could impact other files
-// I spent way too long trying to figure out how to get the test code to work for c++, so message me and I'll create a new file for tests
-// might be a good idea to create the manual first so you know how to implement the class
 
 class Process : public Command<Process> { // Command class needs to be inherited in order to work!!!
   vector<string> tokenizedCommand;
   bool fullFilepath;
-  bool showAll;
+  bool hideDuplicates;
+  bool showPerformanceInfo;
+
+
 
 public:
   explicit Process(vector<string>& tokens) {
     tokenizedCommand = tokens; // should save arguments in the order they were passed in
     fullFilepath = false;
+    hideDuplicates = false;
+    showPerformanceInfo = false;
   }
 
+
   static string returnManFilePath() {
-    // TODO: update the folder name
     return "BuiltinCommands/Process/Manual.txt";
   }
+
 
   static bool validateSyntax(vector<string>& tokens) {
     if (tokens.empty()) { return true; }
@@ -45,23 +46,31 @@ public:
     return true;
   }
 
+
   vector<string> executeCommand() override {
-    // TODO: implement
-    // Will assume validateSyntax was already called, but add error handling just in case
     setFlags();
+    if (showPerformanceInfo) { return getPerformanceInfo(); }
     return readProcesses();
   }
+
+
+
 
 private:
 
   void setFlags() {
     for (string param : tokenizedCommand) {
       for (int i = 1; i < param.size(); i++) {
-        if (param[i] == 'f') { fullFilepath = true; }
-        if (param[i] == 'a') { showAll = true; }
+        switch (param[i]) {
+          case 'f': fullFilepath = true; break;
+          case 'h': hideDuplicates = true; break;
+          case 'p': showPerformanceInfo = true; break;
+          default: break;
+        }
       }
     }
   }
+
 
   vector<string> readProcesses() {
     std::unordered_set<string> runningProcesses;
@@ -73,7 +82,8 @@ private:
     }
 
     unsigned int count = bytesReturned / sizeof(DWORD);
-    string outputBuffer = "PID:            Executable:\n";
+    std::stringstream outputBuffer;
+    outputBuffer << "PID:            Executable:\n";
 
     for (unsigned int i = 0; i < count; ++i) {
 
@@ -92,7 +102,7 @@ private:
 
       // flag adjustments
       if (!fullFilepath) { processName = std::filesystem::path(processName).filename().string(); } // gets only the filename
-      if (!showAll) {
+      if (hideDuplicates) {
         if (runningProcesses.find(processName) == runningProcesses.end()) { runningProcesses.insert(processName); }
         else { CloseHandle(process); continue; }
       }
@@ -100,23 +110,51 @@ private:
       string itemBuffer = "  " + to_string(pid);
       while (itemBuffer.size() < 16) { itemBuffer += " "; }
       itemBuffer += "  " + processName + "\n";
-      outputBuffer += itemBuffer;
+      outputBuffer << itemBuffer;
 
       CloseHandle(process);
     }
 
-    return {outputBuffer, "200"};
+    return {outputBuffer.str(), "200"};
+  }
+
+
+  vector<string> getPerformanceInfo() {
+    PERFORMANCE_INFORMATION performanceInfo;
+    performanceInfo.cb = sizeof(PERFORMANCE_INFORMATION);
+
+    if (!GetPerformanceInfo(&performanceInfo, performanceInfo.cb)) {
+      return {"Failed to get Performance Information. System error message: " + to_string(GetLastError()), "500"};
+    }
+
+    double pageMB = (double)performanceInfo.PageSize / (1024.0 * 1024.0);
+
+    std::stringstream outputBuffer;
+    outputBuffer << WHITE << "\n====={ Performance Information }=====\n" << RESET_TEXT;
+    outputBuffer << "  CommitTotal:          " << (double)performanceInfo.CommitTotal * pageMB << " MB\n";
+    outputBuffer << "  CommitLimit:          " << (double)performanceInfo.CommitLimit * pageMB << " MB\n";
+    outputBuffer << "  CommitPeak:           " << (double)performanceInfo.CommitPeak * pageMB << " MB\n";
+    outputBuffer << "  PhysicalTotal:        " << (double)performanceInfo.PhysicalTotal * pageMB << " MB\n";
+    outputBuffer << "  PhysicalAvailable:    " << (double)performanceInfo.PhysicalAvailable * pageMB << " MB\n";
+    outputBuffer << "  SystemCache:          " << (double)performanceInfo.SystemCache * pageMB << " MB\n";
+    outputBuffer << "  KernelTotal:          " << (double)performanceInfo.KernelTotal * pageMB << " MB\n";
+    outputBuffer << "  KernelPaged:          " << (double)performanceInfo.KernelPaged * pageMB << " MB\n";
+    outputBuffer << "  KernelNonpaged:       " << (double)performanceInfo.KernelNonpaged * pageMB << " MB\n";
+    outputBuffer << "  PageSize:             " << performanceInfo.PageSize << " bytes\n";
+    outputBuffer << "  HandleCount:          " << performanceInfo.HandleCount << "\n";
+    outputBuffer << "  ProcessCount:         " << performanceInfo.ProcessCount << "\n";
+    outputBuffer << "  ThreadCount:          " << performanceInfo.ThreadCount << "\n";
+
+    return {outputBuffer.str(), "200"};
   }
 
 
 
   // chat gave me this which should encode everything correctly
   static string utf8_encode(const std::wstring& wstr) {
-    int size_needed = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(),
-                                          (int)wstr.size(), nullptr, 0, nullptr, nullptr);
+    int size_needed = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.size(), nullptr, 0, nullptr, nullptr);
     string str(size_needed, 0);
-    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.size(),
-                        &str[0], size_needed, nullptr, nullptr);
+    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.size(), &str[0], size_needed, nullptr, nullptr);
     return str;
   }
 
