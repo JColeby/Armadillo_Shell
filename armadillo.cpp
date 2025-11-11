@@ -4,6 +4,7 @@
 #include <windows.h>
 #include "inputLoop.h"
 #include "TerminalFormatting.h"
+#include "Resources/ardoASCII.h"
 
 using std::string;
 using std::vector;
@@ -12,17 +13,6 @@ using std::endl;
 using std::ifstream;
 
 using namespace VT;
-
-
-int printTextFile(const string& filename) {
-  if (ifstream file(filename); !file.is_open()) { return 1; }
-  else {
-    string line;
-    while (getline(file, line)) { cout << line << endl; }
-    file.close();
-  }
-  return 0;
-}
 
 
 int main() {
@@ -35,22 +25,9 @@ int main() {
 
     // printing out ascii art and shell information
     system("cls");
-    cout << YELLOW;
-    int success = printTextFile("Resources/armadilloASCII.txt");
-    if (success == 1) {
-      success = printTextFile("../Resources/armadilloASCII.txt");
-      if (success == 1) { cerr << "Error: Could not display ascii art'\n"; }
-    }
-    cout << RESET_TEXT;
-    cout << "##########################################################################################" << endl;
-    cout << BLUE;
-
-    int success2 = printTextFile("Resources/armadilloLogo.txt");
-    if (success2 == 1) {
-      success2 = printTextFile("../Resources/armadilloLogo.txt");
-      if (success2 == 1) { cerr << "Error: Could not display ascii art'\n"; }
-    }
-    cout << RESET_TEXT;
+    cout << YELLOW << armadilloASCII << RESET_TEXT;
+    cout << "##########################################################################################";
+    cout << BLUE << armadilloLogo << RESET_TEXT;
     cout << "##########################################################################################" << endl << endl;
     cout << WHITE;
     cout << "     -  press ctrl+q to terminate any active command" << endl

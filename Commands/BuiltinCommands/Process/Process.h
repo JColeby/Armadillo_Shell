@@ -9,6 +9,7 @@
 #include "../../Command.h"
 #include "../../../TerminalFormatting.h"
 #include <unordered_set>
+#include "Manual.h"
 #pragma comment(lib, "Psapi.lib")
 
 using namespace VT;
@@ -33,8 +34,8 @@ public:
   }
 
 
-  static string returnManFilePath() {
-    return "BuiltinCommands/Process/Manual.txt";
+  static string returnManText() {
+    return ProcessManual;
   }
 
 

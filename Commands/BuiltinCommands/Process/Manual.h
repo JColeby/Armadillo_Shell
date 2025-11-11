@@ -1,4 +1,7 @@
-Process Command:
+#pragma once
+#include <string>
+
+const std::string ProcessManual = R"(Process Command:
     will show all the processes currently running.
 
     Syntax:
@@ -8,3 +11,5 @@ Process Command:
         -h      hides duplicate processes that are from the same executable
         -f      displays the full filepath
         -p      displays performance information instead
+
+)";

@@ -1,4 +1,7 @@
-Edit Command:
+#pragma once
+#include <string>
+
+const std::string EditManual = R"(Edit Command:
 
     Syntax:
         edit <filepath>
@@ -11,3 +14,4 @@ Edit Command:
     Additional info:
         if the provided filepath doesn't exist, a new file will be created at that location the next time you save.
         killing the command using ctrl+q will show the same prompts as ctrl+x before you exit.
+)";

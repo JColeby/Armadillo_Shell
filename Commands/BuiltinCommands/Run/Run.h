@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include "../../Command.h"
+#include "Manual.h"
 
 
 
@@ -21,9 +22,8 @@ public:
         tokenizedCommand = tokens; // should save arguments in the order they were passed in
     }
 
-    static string returnManFilePath() {
-        // TODO: update the folder name
-        return "BuiltinCommands/<ExampleCommand>/Manual.txt";
+    static string returnManText() {
+        return RunManual;
     }
 
     static bool validateSyntax(vector<string>& tokens) {

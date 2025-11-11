@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "Manual.h"
 
 
 // ===================={ Command Template }====================
@@ -20,9 +21,9 @@ public:
         tokenizedCommand = tokens; // should save arguments in the order they were passed in
     }
 
-    static string returnManFilePath() {
-        // TODO: update the folder name
-        return "BuiltinCommands/ExampleCommand2/Manual.txt";
+    static string returnManText() {
+        // TODO: update the global variable name
+        return ExampleCommand2Manual;
     }
 
     static bool validateSyntax(vector<string>& tokens) {

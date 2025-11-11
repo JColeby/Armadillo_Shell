@@ -6,7 +6,7 @@
 #include <vector>
 #include <filesystem>
 #include "../../Command.h"
-
+#include "Manual.h"
 
 class Edit : public Command<Edit> {
   vector<string> tokenizedCommand;
@@ -60,8 +60,8 @@ public:
   }
 
 
-  static string returnManFilePath() {
-    return "BuiltinCommands/Edit/Manual.txt";
+  static string returnManText() {
+    return EditManual;
   }
 
 

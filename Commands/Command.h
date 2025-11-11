@@ -23,7 +23,7 @@ public:
     // setting virtual methods to 0/default tells the compiler that each child class will have its own implementation
     static bool validateSyntax(vector<string> tokens) { return T::validateSyntax(tokens); };
     virtual vector<string> executeCommand() = 0;
-    static string returnManFilePath() { return T::returnManFilePath();}
+    static string returnManText() { return T::returnManFilePath();}
     virtual ~Command() = default;
 
 protected: // like private, but it allows child classes to inherit the methods
