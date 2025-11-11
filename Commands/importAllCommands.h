@@ -8,6 +8,7 @@
 #include "BuiltinCommands/Run/Run.h"
 #include "BuiltinCommands/Edit/Edit.h"
 #include "BuiltinCommands/Process/Process.h"
+#include "BuiltinCommands/Find/Find.h"
 using std::string;
 using std::vector;
 using std::cout;

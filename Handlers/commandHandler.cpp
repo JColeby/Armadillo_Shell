@@ -9,5 +9,6 @@ vector<string> commandHandler(vector<string>& tokenizedInput) {
     if (command == "run") { return validateAndExecuteCommand<Run>(tokenizedInput); }
     if (command == "edit") { return validateAndExecuteCommand<Edit>(tokenizedInput); }
     if (command == "process") { return validateAndExecuteCommand<Process>(tokenizedInput); }
+    if (command == "find") { return validateAndExecuteCommand<Find>(tokenizedInput); }
     return { "'" + tokenizedInput[0] + "' is not a valid command", "4"};
 }
