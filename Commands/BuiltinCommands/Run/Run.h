@@ -7,11 +7,8 @@
 
 
 
-// ===================={ Command Template }====================
-// TODO: DO NOT MODIFY THIS FILE DIRECTLY!!! Copy the contents of this file into a new header file
-// TODO: Please add test code! This will make it easier to debug the shell when making changes that could impact other files
-// I spent way too long trying to figure out how to get the test code to work for c++, so message me and I'll create a new file for tests
-// might be a good idea to create the manual first so you know how to implement the class
+// ===================={ Run Command }====================
+
 
 class Run : public Command<Run> { // Command class needs to be inherited in order to work!!!
     vector<string> tokenizedCommand;

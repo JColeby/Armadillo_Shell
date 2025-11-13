@@ -17,6 +17,7 @@ class Find : public Command<Find> { // Command class needs to be inherited in or
   bool matchFiles;
   bool getAllMatches;
   bool displayFullPath;
+  bool killed;
   // add more class variables as needed.
 
 public:
@@ -25,6 +26,7 @@ public:
     matchFiles = false;
     getAllMatches = false;
     displayFullPath = true;
+    killed = false;
 
     desiredFile = "";
     startingDirectory = "";
@@ -130,6 +132,7 @@ public:
     catch (const std::runtime_error& e) {
       return {e.what(), "500"};
     }
+    if (killed) { return { formatFoundFiles(), "600"}; }
     return { formatFoundFiles(), "200"};
   }
 
@@ -142,6 +145,8 @@ private:
 
     for (auto it = recursive_directory_iterator(startPath);
          it != recursive_directory_iterator(); ++it) {
+
+      if (killSwitch) { killed = true; return; }
 
       path entryPath = it->path();
       string entryName = entryPath.filename().string();
@@ -277,4 +282,5 @@ private:
 //     recursiveSearch();
 //   }
 // }
+
 

@@ -37,7 +37,7 @@ void displayOutput(const vector<string>& commandOutput) {
     cout << YELLOW << "MALFORMED ERROR: " << commandOutput[0] << endl << RESET_TEXT;
   }
   else if (commandOutput[1][0] == '5') { // command error
-    cerr << RED << "ERROR:" << commandOutput[0] << endl << RESET_TEXT;
+    cerr << RED << "ERROR: " << commandOutput[0] << endl << RESET_TEXT;
   }
   else if (commandOutput[1][0] == '6') { // early exit successful
     cout << YELLOW << "Exited Command Successfully" << endl
@@ -78,6 +78,7 @@ vector<string> tokenizeInput(const string& inputString) {
     }
     return tokens;
 }
+
 
 void inputHandler(const string& userInput) {
   containsPipe = false;

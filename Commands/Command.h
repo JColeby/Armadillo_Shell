@@ -14,7 +14,9 @@ using std::exception;
 using std::ifstream;
 using std::ofstream;
 // ===================={ Command Parent }====================
-// Please don't modify this file unless you know what you are doing!
+// TODO: Please reach out to me (Jonathan) before touching this file!!!
+// This file contains critical code that is used across ALL commands
+// Please don't be the reason multiple things break
 
 template <typename T>
 class Command {
@@ -28,5 +30,7 @@ public:
 
 protected: // like private, but it allows child classes to inherit the methods
     // this will contain methods that you want to have shared across multiple commands
+    // Only put code here that is in a final state, as multiple files will rely on it
+    // once you put something here, don't change it (especially after you push/merge changes)
 };
 
