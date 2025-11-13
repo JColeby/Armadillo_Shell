@@ -84,22 +84,22 @@ private:
 
     unsigned int count = bytesReturned / sizeof(DWORD);
     std::stringstream outputBuffer;
-    outputBuffer << "PID:            Executable:\n";
+    outputBuffer << WHITE << "PID:            Executable:\n" << RESET_TEXT;
 
     for (unsigned int i = 0; i < count; ++i) {
 
       // getting the current process
       DWORD pid = processes[i];
-      if (pid == 0) { continue; }
+      if (pid == 0) { continue; } // skip system idle process
       HANDLE process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
-      if (!process) { continue; }
+      if (!process) { continue; } // skip if we can't get the process
 
       // getting the filepath
-      wchar_t exeName[MAX_PATH] = L"[Unknown]";
+      wchar_t exeName[MAX_PATH] = L"[Unknown]";     // wchar is used so we can handle unicode characters correctly
       if (!GetModuleFileNameExW(process, nullptr, exeName, MAX_PATH)) {
         wcscpy_s(exeName, L"[Access Denied]");
       }
-      string processName = utf8_encode(exeName);
+      string processName = utf8_encode(exeName); // encode it back to
 
       // flag adjustments
       if (!fullFilepath) { processName = std::filesystem::path(processName).filename().string(); } // gets only the filename
@@ -120,7 +120,7 @@ private:
   }
 
 
-  vector<string> getPerformanceInfo() {
+  vector<string> getPerformanceInfo() { // basically dumping the entire PERFORMANCE_INFORMATION structure
     PERFORMANCE_INFORMATION performanceInfo;
     performanceInfo.cb = sizeof(PERFORMANCE_INFORMATION);
 

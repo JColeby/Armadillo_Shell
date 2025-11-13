@@ -33,10 +33,10 @@ int displayCurrentDirectory() {
       cerr << "FATAL ERROR: failed to fetch current directory. Exiting Armadillo" << endl;
       return -1;
     }
-    cout << YELLOW << "ARDO"
+    cout << BLUE << "ARDO"
          << WHITE  << " => "
          << CYAN << pathBuffer
          << WHITE << " => "
-         << DEFAULT; // light grey (closest equivalent)
+         << DEFAULT;
     return 1;
 }
