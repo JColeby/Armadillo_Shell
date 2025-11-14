@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include "../TerminalFormatting.h"
 #include "../Globals/GlobalFlags.h"
 
 using std::string;
@@ -13,6 +14,7 @@ using std::runtime_error;
 using std::exception;
 using std::ifstream;
 using std::ofstream;
+using namespace VT;
 // ===================={ Command Parent }====================
 // TODO: Please reach out to me (Jonathan) before touching this file!!!
 // This file contains critical code that is used across ALL commands
