@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <psapi.h>
+#pragma comment(lib, "Psapi.lib")
 
 // ===================={ System Info Command }====================
 // TODO: add documentation to the manual file so James knows what flags and other info you implemented
@@ -12,11 +14,18 @@
 
 class SystemInfo : public Command<SystemInfo> { // Command class needs to be inherited in order to work!!!
   vector<string> tokenizedCommand;
-  // add more class variables as needed.
+  bool getArchitecture;
+  bool getCore;
+  bool getMemory;
+  bool getPerformance;
 
 public:
   explicit SystemInfo(vector<string>& tokens) {
     tokenizedCommand = tokens; // should save arguments in the order they were passed in
+    getArchitecture = false;
+    getCore = false;
+    getMemory = false;
+    getPerformance = false;
   }
 
   static string returnManText() {
@@ -24,25 +33,60 @@ public:
   }
 
   static bool validateSyntax(vector<string>& tokens) {
-    // TODO: implement
-    // this should be a simple validation so it can be used when validating
-    // commands that are getting piped. More thorough validations can be done
-    // in the execute command itself.
-    // tokens should contain all of the command inputs the user provided
-    // in order. However, It will not contain the command at the start.
+    if (tokens.empty()) { return true; }
+    for (string token : tokens) {
+      if (token.front() != '-') { return false; }
+    }
     return true;
   }
 
   vector<string> executeCommand() override {
+    setFlags();
     // querying the computer architecture
     SYSTEM_INFO system_info;
     GetNativeSystemInfo(&system_info);
+    std::stringstream outputBuffer;
+    if (getArchitecture) {
+      outputBuffer << WHITE << "\n====={ Architecture Information }=====\n" << RESET_TEXT;
+      outputBuffer << getArchitectureInfo(system_info) << "\n";
+    }
+    if (getCore) {
+      outputBuffer << getCoreInfo(system_info) << "\n";
+    }
+    if (getMemory) {
+      outputBuffer << getMemoryInfo() << "\n";
+    }
+    if (getPerformance) {
+      outputBuffer << getPerformanceInfo() << "\n";
+    }
 
-    return {"Not Implemented", "500"};
+    return {outputBuffer.str(), "500"};
   }
 
 private:
-  string getSystemArchitecture(SYSTEM_INFO system_info) {
+  void setFlags() {
+    if (tokenizedCommand.empty()) {
+      getArchitecture = true;
+      getCore = true;
+      getMemory = true;
+      getPerformance = true;
+      return;
+    }
+    for (string param : tokenizedCommand) {
+      for (int i = 1; i < param.size(); i++) {
+        switch (param[i]) {
+        case 'a': getArchitecture = true; break;
+        case 'c': getCore = true; break;
+        case 'm': getMemory = true; break;
+        case 'p': getPerformance = true;  break;
+        default: break;
+        }
+      }
+    }
+  }
+
+
+  string getArchitectureInfo(SYSTEM_INFO system_info) {
     // deciphering the architecture
     switch (system_info.wProcessorArchitecture) {
     case PROCESSOR_ARCHITECTURE_AMD64:
@@ -61,24 +105,9 @@ private:
   }
 
 
-  string getProcessorInfo(SYSTEM_INFO system_info) {
-    int logicalProcessors = (int)system_info.dwNumberOfProcessors;
+  string getCoreInfo(SYSTEM_INFO system_info) {
+    std::stringstream outputBuffer;
 
-    int activeProcessors = 0;
-
-    // because dwActiveProcessorMask is a bitmask, with each bit representing a processor, we have to
-    // loop through each bit. Which is why we have this weird setup
-    DWORD_PTR activeProcessorsMask = system_info.dwActiveProcessorMask;
-    for (DWORD i = 0; i < sizeof(DWORD_PTR) * 8; i++) {
-      if (activeProcessorsMask & ((DWORD_PTR)1 << i)) { activeProcessors += 1; }
-    }
-
-    return "Logical Processors: " + std::to_string(logicalProcessors) + "\n"
-           + "Active Processors: " + std::to_string(activeProcessors) + "\n";
-  }
-
-
-  string getCoreInfo() {
     // because GetLogicalProcessorInformation returns an array of structures, we'll need to get the length of the buffer to
     // pass in. Fortunately GetLogicalProcessorInformation will do this for us if we pass in a nullptr.
     // It saves the required array size in bytes to DWORD len.
@@ -91,31 +120,77 @@ private:
     vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> buffer(count);
 
     // now we can pass in our buffer and get the info we need!
-    if (!GetLogicalProcessorInformation(buffer.data(), &len)) { return 0; }
+    if (!GetLogicalProcessorInformation(buffer.data(), &len)) {
+      std::stringstream errorMsg;
+      errorMsg << RED << "ERROR: Failed to get core info \n" << RESET_TEXT;
+      return errorMsg.str();
+    }
 
     int physicalCores = 0;
-
     for (const auto& info : buffer) {
       // RelationProcessorCore represents info about a core.
       // Since we are only interested in the number of cores, we don't do anything else with it.
       if (info.Relationship == RelationProcessorCore) { physicalCores++; }
     }
 
-    return "Number of Cores: " + std::to_string(physicalCores) + "\n";
+    int logicalProcessors = (int)system_info.dwNumberOfProcessors;
+    int activeProcessors = 0;
+
+    // because dwActiveProcessorMask is a bitmask, with each bit representing a processor, we have to
+    // loop through each bit. Which is why we have this weird setup
+    DWORD_PTR activeProcessorsMask = system_info.dwActiveProcessorMask;
+    for (DWORD i = 0; i < sizeof(DWORD_PTR) * 8; i++) {
+      if (activeProcessorsMask & ((DWORD_PTR)1 << i)) { activeProcessors += 1; }
+    }
+
+    outputBuffer << WHITE << "\n====={ Core Information }=====\n" << RESET_TEXT;
+    outputBuffer << "  Number of Cores: " << std::to_string(physicalCores) << "\n";
+    outputBuffer << "  Logical Processors: " << std::to_string(logicalProcessors) << "\n";
+    outputBuffer << "  Active Processors: " << std::to_string(activeProcessors) << "\n";
+    return outputBuffer.str();
   }
 
-  string getSystemMemory() {
-    std::stringstream memoryInfo;
+
+  string getMemoryInfo() {
+    std::stringstream outputBuffer;
 
     MEMORYSTATUSEX memoryState = {};
     memoryState.dwLength = sizeof(memoryState);
     if (!GlobalMemoryStatusEx(&memoryState)) {
-      return memoryInfo.str() + RED + "ERROR: Failed to get memory status \n" + RESET_TEXT;
+      return outputBuffer.str() + RED + "ERROR: Failed to get memory status \n" + RESET_TEXT;
     }
-    memoryInfo << "Memory Usage: " << memoryState.dwMemoryLoad << "%\n";
-    memoryInfo << "Memory Installed: " << memoryState.ullTotalPhys / (1024*1024) << " MB\n";
-    memoryInfo << "Memory Available: " << memoryState.ullAvailPhys / (1024*1024) << " MB\n";
-    return memoryInfo.str();
+    outputBuffer << WHITE << "\n====={ Memory Information }=====\n" << RESET_TEXT;
+    outputBuffer << "  Memory Usage: " << memoryState.dwMemoryLoad << "%\n";
+    outputBuffer << "  Memory Installed: " << memoryState.ullTotalPhys / (1024*1024) << " MB\n";
+    outputBuffer << "  Memory Available: " << memoryState.ullAvailPhys / (1024*1024) << " MB\n";
+    return outputBuffer.str();
+  }
+
+
+  string getPerformanceInfo() {
+    PERFORMANCE_INFORMATION performanceInfo;
+    performanceInfo.cb = sizeof(PERFORMANCE_INFORMATION);
+
+    if (!GetPerformanceInfo(&performanceInfo, performanceInfo.cb)) {
+      std::stringstream errorMsg;
+      errorMsg << RED << "ERROR: Failed to get performance info \n" << RESET_TEXT;
+      return errorMsg.str();
+    }
+
+    double pageMB = (double)performanceInfo.PageSize / (1024.0 * 1024.0);
+
+    std::stringstream outputBuffer;
+    outputBuffer << WHITE << "\n====={ Performance Information }=====\n" << RESET_TEXT;
+    outputBuffer << "  Page Size: " << performanceInfo.PageSize *pageMB << " MB\n";
+    outputBuffer << "  Committed Pages: " << (double)performanceInfo.CommitTotal * pageMB << " MB\n";
+    outputBuffer << "  Current Page Max: " << (double)performanceInfo.CommitLimit * pageMB << " MB\n";
+    outputBuffer << "  Peak Committed Pages: " << (double)performanceInfo.CommitPeak * pageMB << " MB\n";
+    outputBuffer << "  System Cache Memory: " << (double)performanceInfo.SystemCache * pageMB << " MB\n";
+    outputBuffer << "  Handle Count: " << performanceInfo.HandleCount << "\n";
+    outputBuffer << "  Process Count: " << performanceInfo.ProcessCount << "\n";
+    outputBuffer << "  Thread Count: " << performanceInfo.ThreadCount << "\n";
+
+    return outputBuffer.str();
   }
 
 
