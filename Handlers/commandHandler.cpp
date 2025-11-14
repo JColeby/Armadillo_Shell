@@ -19,5 +19,6 @@ vector<string> commandHandler(vector<string>& tokenizedInput) {
     if (command == "manual" or command == "man") { return validateAndExecuteCommand<Man>(tokenizedInput); }
     if (command == "printWorkingDirectory" or command == "pwd") { return validateAndExecuteCommand<PrintWorkingDirectory>(tokenizedInput); }
     if (command == "find") { return validateAndExecuteCommand<Find>(tokenizedInput); }
+    if (command == "sys" or command == "systemInfo") { return validateAndExecuteCommand<SystemInfo>(tokenizedInput); }
     return { "'" + tokenizedInput[0] + "' is not a valid command", "4"};
 }

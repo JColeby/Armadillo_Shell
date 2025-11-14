@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 #include <psapi.h>
-#pragma comment(lib, "Psapi.lib")
 
 // ===================={ System Info Command }====================
 // TODO: add documentation to the manual file so James knows what flags and other info you implemented
@@ -48,19 +47,19 @@ public:
     std::stringstream outputBuffer;
     if (getArchitecture) {
       outputBuffer << WHITE << "\n====={ Architecture Information }=====\n" << RESET_TEXT;
-      outputBuffer << getArchitectureInfo(system_info) << "\n";
+      outputBuffer << getArchitectureInfo(system_info);
     }
     if (getCore) {
-      outputBuffer << getCoreInfo(system_info) << "\n";
+      outputBuffer << getCoreInfo(system_info);
     }
     if (getMemory) {
-      outputBuffer << getMemoryInfo() << "\n";
+      outputBuffer << getMemoryInfo();
     }
     if (getPerformance) {
-      outputBuffer << getPerformanceInfo() << "\n";
+      outputBuffer << getPerformanceInfo();
     }
 
-    return {outputBuffer.str(), "500"};
+    return {outputBuffer.str(), "200"};
   }
 
 private:
@@ -86,26 +85,26 @@ private:
   }
 
 
-  string getArchitectureInfo(SYSTEM_INFO system_info) {
+  static string getArchitectureInfo(SYSTEM_INFO system_info) {
     // deciphering the architecture
     switch (system_info.wProcessorArchitecture) {
     case PROCESSOR_ARCHITECTURE_AMD64:
-      return "System Architecture: AMD x64 \n";
+      return "  System Architecture: AMD x64 \n";
     case PROCESSOR_ARCHITECTURE_ARM:
-      return "System Architecture: ARM \n";
+      return "  System Architecture: ARM \n";
     case PROCESSOR_ARCHITECTURE_ARM64:
-      return "System Architecture: ARM x64 \n";
+      return "  System Architecture: ARM x64 \n";
     case PROCESSOR_ARCHITECTURE_IA64:
-      return "System Architecture: IA-64 \n";
+      return "  System Architecture: IA-64 \n";
     case PROCESSOR_ARCHITECTURE_INTEL:
-      return "System Architecture: INTEL x86 \n";
+      return "  System Architecture: INTEL x86 \n";
     default:
-      return "System Architecture: UNKNOWN \n";
+      return "  System Architecture: UNKNOWN \n";
     }
   }
 
 
-  string getCoreInfo(SYSTEM_INFO system_info) {
+  static string getCoreInfo(SYSTEM_INFO system_info) {
     std::stringstream outputBuffer;
 
     // because GetLogicalProcessorInformation returns an array of structures, we'll need to get the length of the buffer to
@@ -151,7 +150,7 @@ private:
   }
 
 
-  string getMemoryInfo() {
+  static string getMemoryInfo() {
     std::stringstream outputBuffer;
 
     MEMORYSTATUSEX memoryState = {};
@@ -167,7 +166,7 @@ private:
   }
 
 
-  string getPerformanceInfo() {
+  static string getPerformanceInfo() {
     PERFORMANCE_INFORMATION performanceInfo;
     performanceInfo.cb = sizeof(PERFORMANCE_INFORMATION);
 
@@ -181,7 +180,7 @@ private:
 
     std::stringstream outputBuffer;
     outputBuffer << WHITE << "\n====={ Performance Information }=====\n" << RESET_TEXT;
-    outputBuffer << "  Page Size: " << performanceInfo.PageSize *pageMB << " MB\n";
+    outputBuffer << "  Page Size: " << (double)performanceInfo.PageSize *pageMB << " MB\n";
     outputBuffer << "  Committed Pages: " << (double)performanceInfo.CommitTotal * pageMB << " MB\n";
     outputBuffer << "  Current Page Max: " << (double)performanceInfo.CommitLimit * pageMB << " MB\n";
     outputBuffer << "  Peak Committed Pages: " << (double)performanceInfo.CommitPeak * pageMB << " MB\n";

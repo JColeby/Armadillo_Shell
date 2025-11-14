@@ -17,6 +17,7 @@
 #include "BuiltinCommands/MakeDirectory/MakeDirectory.h"
 #include "BuiltinCommands/Man/Man.h"
 #include "BuiltinCommands/PrintWorkingDirectory/PrintWorkingDirectory.h"
+#include "BuiltinCommands/SystemInfo/SystemInfo.h"
 
 
 using std::string;
