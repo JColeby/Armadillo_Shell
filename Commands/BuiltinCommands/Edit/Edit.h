@@ -26,7 +26,6 @@ class Edit : public Command<Edit> {
   DWORD startingMode; // initial console state
 
 
-
 public:
   explicit Edit(vector<string>& tokens) {
     tokenizedCommand = tokens;

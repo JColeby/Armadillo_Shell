@@ -176,15 +176,16 @@ private:
       return errorMsg.str();
     }
 
-    double pageMB = (double)performanceInfo.PageSize / (1024.0 * 1024.0);
+    double pageKB = (double)performanceInfo.PageSize / 1024.0;
 
     std::stringstream outputBuffer;
     outputBuffer << WHITE << "\n====={ Performance Information }=====\n" << RESET_TEXT;
-    outputBuffer << "  Page Size: " << (double)performanceInfo.PageSize *pageMB << " MB\n";
-    outputBuffer << "  Committed Pages: " << (double)performanceInfo.CommitTotal * pageMB << " MB\n";
-    outputBuffer << "  Current Page Max: " << (double)performanceInfo.CommitLimit * pageMB << " MB\n";
-    outputBuffer << "  Peak Committed Pages: " << (double)performanceInfo.CommitPeak * pageMB << " MB\n";
-    outputBuffer << "  System Cache Memory: " << (double)performanceInfo.SystemCache * pageMB << " MB\n";
+    outputBuffer << "  Page Size: " << pageKB << " KB\n";
+    outputBuffer << "  Committed Pages: " << performanceInfo.CommitTotal << " pages\n";
+    outputBuffer << "  Current Page Limit: " << performanceInfo.CommitLimit << " pages\n";
+    outputBuffer << "  Allocated Kernel Memory: " << ((double)performanceInfo.KernelTotal * pageKB) / 1024.0 << " MB\n";
+    outputBuffer << "  Paged Kernel Memory: " << ((double)performanceInfo.KernelPaged * pageKB) / 1024.0 << " MB\n";
+    outputBuffer << "  System Cache Memory: " << ((double)performanceInfo.SystemCache * pageKB) / 1024.0 << " MB\n";
     outputBuffer << "  Handle Count: " << performanceInfo.HandleCount << "\n";
     outputBuffer << "  Process Count: " << performanceInfo.ProcessCount << "\n";
     outputBuffer << "  Thread Count: " << performanceInfo.ThreadCount << "\n";

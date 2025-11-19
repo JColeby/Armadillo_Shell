@@ -15,6 +15,7 @@ using std::exception;
 using std::ifstream;
 using std::ofstream;
 using namespace VT;
+
 // ===================={ Command Parent }====================
 // TODO: Please reach out to me (Jonathan) before touching this file!!!
 // This file contains critical code that is used across ALL commands
@@ -27,7 +28,7 @@ public:
     // setting virtual methods to 0/default tells the compiler that each child class will have its own implementation
     static bool validateSyntax(vector<string> tokens) { return T::validateSyntax(tokens); };
     virtual vector<string> executeCommand() = 0;
-    static string returnManText() { return T::returnManFilePath();}
+    static string returnManText() { return T::returnManFilePath(); }
     virtual ~Command() = default;
 
 protected: // like private, but it allows child classes to inherit the methods

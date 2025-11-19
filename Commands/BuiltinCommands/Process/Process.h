@@ -10,7 +10,6 @@
 #include "../../../TerminalFormatting.h"
 #include <unordered_set>
 #include "Manual.h"
-#pragma comment(lib, "Psapi.lib")
 
 using namespace VT;
 using std::to_string;
@@ -22,8 +21,6 @@ class Process : public Command<Process> { // Command class needs to be inherited
   bool fullFilepath;
   bool hideDuplicates;
 
-
-
 public:
   explicit Process(vector<string>& tokens) {
     tokenizedCommand = tokens; // should save arguments in the order they were passed in
@@ -31,11 +28,9 @@ public:
     hideDuplicates = false;
   }
 
-
   static string returnManText() {
     return ProcessManual;
   }
-
 
   static bool validateSyntax(vector<string>& tokens) {
     if (tokens.empty()) { return true; }
@@ -44,7 +39,6 @@ public:
     }
     return true;
   }
-
 
   vector<string> executeCommand() override {
     setFlags();
