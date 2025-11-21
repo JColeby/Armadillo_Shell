@@ -14,17 +14,19 @@
 class SystemInfo : public Command<SystemInfo> { // Command class needs to be inherited in order to work!!!
   vector<string> tokenizedCommand;
   bool getArchitecture;
-  bool getCore;
+  bool getCpu;
   bool getMemory;
   bool getPerformance;
+  bool getDrive;
 
 public:
   explicit SystemInfo(vector<string>& tokens) {
     tokenizedCommand = tokens; // should save arguments in the order they were passed in
     getArchitecture = false;
-    getCore = false;
+    getCpu = false;
     getMemory = false;
     getPerformance = false;
+    getDrive = false;
   }
 
   static string returnManText() {
@@ -49,11 +51,14 @@ public:
       outputBuffer << WHITE << "\n====={ Architecture Information }=====\n" << RESET_TEXT;
       outputBuffer << getArchitectureInfo(system_info);
     }
-    if (getCore) {
-      outputBuffer << getCoreInfo(system_info);
+    if (getCpu) {
+      outputBuffer << getCpuInfo(system_info);
     }
     if (getMemory) {
       outputBuffer << getMemoryInfo();
+    }
+    if (getDrive) {
+      outputBuffer << getDiskInfo();
     }
     if (getPerformance) {
       outputBuffer << getPerformanceInfo();
@@ -66,18 +71,20 @@ private:
   void setFlags() {
     if (tokenizedCommand.empty()) {
       getArchitecture = true;
-      getCore = true;
+      getCpu = true;
       getMemory = true;
       getPerformance = true;
+      getDrive = true;
       return;
     }
     for (string param : tokenizedCommand) {
       for (int i = 1; i < param.size(); i++) {
         switch (param[i]) {
         case 'a': getArchitecture = true; break;
-        case 'c': getCore = true; break;
+        case 'c': getCpu = true; break;
         case 'm': getMemory = true; break;
         case 'p': getPerformance = true;  break;
+        case 'd': getDrive = true;  break;
         default: break;
         }
       }
@@ -104,7 +111,7 @@ private:
   }
 
 
-  static string getCoreInfo(SYSTEM_INFO system_info) {
+  static string getCpuInfo(SYSTEM_INFO system_info) {
     std::stringstream outputBuffer;
 
     // because GetLogicalProcessorInformation returns an array of structures, we'll need to get the length of the buffer to
@@ -121,7 +128,7 @@ private:
     // now we can pass in our buffer and get the info we need!
     if (!GetLogicalProcessorInformation(buffer.data(), &len)) {
       std::stringstream errorMsg;
-      errorMsg << RED << "ERROR: Failed to get core info \n" << RESET_TEXT;
+      errorMsg << RED << "\nERROR: Failed to get core info \n" << RESET_TEXT;
       return errorMsg.str();
     }
 
@@ -142,7 +149,7 @@ private:
       if (activeProcessorsMask & ((DWORD_PTR)1 << i)) { activeProcessors += 1; }
     }
 
-    outputBuffer << WHITE << "\n====={ Core Information }=====\n" << RESET_TEXT;
+    outputBuffer << WHITE << "\n====={ CPU Information }=====\n" << RESET_TEXT;
     outputBuffer << "  Number of Cores: " << std::to_string(physicalCores) << "\n";
     outputBuffer << "  Logical Processors: " << std::to_string(logicalProcessors) << "\n";
     outputBuffer << "  Active Processors: " << std::to_string(activeProcessors) << "\n";
@@ -156,12 +163,12 @@ private:
     MEMORYSTATUSEX memoryState = {};
     memoryState.dwLength = sizeof(memoryState);
     if (!GlobalMemoryStatusEx(&memoryState)) {
-      return outputBuffer.str() + RED + "ERROR: Failed to get memory status \n" + RESET_TEXT;
+      return outputBuffer.str() + RED + "\nERROR: Failed to get memory status \n" + RESET_TEXT;
     }
     outputBuffer << WHITE << "\n====={ Memory Information }=====\n" << RESET_TEXT;
     outputBuffer << "  Memory Usage: " << memoryState.dwMemoryLoad << "%\n";
-    outputBuffer << "  Memory Installed: " << memoryState.ullTotalPhys / (1024*1024) << " MB\n";
-    outputBuffer << "  Memory Available: " << memoryState.ullAvailPhys / (1024*1024) << " MB\n";
+    outputBuffer << "  Memory Installed: " << bytesToReadableString((double)memoryState.ullTotalPhys) << "\n";
+    outputBuffer << "  Memory Available: " << bytesToReadableString((double)memoryState.ullAvailPhys) << "\n";
     return outputBuffer.str();
   }
 
@@ -172,20 +179,20 @@ private:
 
     if (!GetPerformanceInfo(&performanceInfo, performanceInfo.cb)) {
       std::stringstream errorMsg;
-      errorMsg << RED << "ERROR: Failed to get performance info \n" << RESET_TEXT;
+      errorMsg << RED << "\nERROR: Failed to get performance info \n" << RESET_TEXT;
       return errorMsg.str();
     }
 
-    double pageKB = (double)performanceInfo.PageSize / 1024.0;
+    auto pgSize = (double)performanceInfo.PageSize;
 
     std::stringstream outputBuffer;
     outputBuffer << WHITE << "\n====={ Performance Information }=====\n" << RESET_TEXT;
-    outputBuffer << "  Page Size: " << pageKB << " KB\n";
+    outputBuffer << "  Page Size: " << bytesToReadableString((double)performanceInfo.PageSize) << "\n";
     outputBuffer << "  Committed Pages: " << performanceInfo.CommitTotal << " pages\n";
     outputBuffer << "  Current Page Limit: " << performanceInfo.CommitLimit << " pages\n";
-    outputBuffer << "  Allocated Kernel Memory: " << ((double)performanceInfo.KernelTotal * pageKB) / 1024.0 << " MB\n";
-    outputBuffer << "  Paged Kernel Memory: " << ((double)performanceInfo.KernelPaged * pageKB) / 1024.0 << " MB\n";
-    outputBuffer << "  System Cache Memory: " << ((double)performanceInfo.SystemCache * pageKB) / 1024.0 << " MB\n";
+    outputBuffer << "  Allocated Kernel Memory: " << bytesToReadableString((double)performanceInfo.KernelTotal * pgSize) << "\n";
+    outputBuffer << "  Paged Kernel Memory: " << bytesToReadableString((double)performanceInfo.KernelPaged * pgSize) << "\n";
+    outputBuffer << "  System Cache Memory: " << bytesToReadableString((double)performanceInfo.SystemCache * pgSize) << "\n";
     outputBuffer << "  Handle Count: " << performanceInfo.HandleCount << "\n";
     outputBuffer << "  Process Count: " << performanceInfo.ProcessCount << "\n";
     outputBuffer << "  Thread Count: " << performanceInfo.ThreadCount << "\n";
@@ -194,8 +201,44 @@ private:
   }
 
 
+  static string getDiskInfo() {
+    // Querying the drives available.
+    // GetLogicalDrives returns a bitmask that represents disk drives that are currently available
+    // Bit position 0 (the least-significant bit) is drive A, bit position 1 is drive B, bit position 2 is drive C, and so on.
+    DWORD driveBitmask = GetLogicalDrives();
 
+    if (!driveBitmask) {
+      std::stringstream errorMsg;
+      errorMsg << RED << "\nERROR: Failed to get drive/disk info \n" << RESET_TEXT;
+      return errorMsg.str();
+    }
 
+    std::stringstream outputBuffer;
+    outputBuffer << WHITE << "\n====={ Drive/Disk Information }=====\n" << RESET_TEXT;
+
+    for (wchar_t i = 'A'; i <= 'Z'; i++) {
+      if (driveBitmask & 1) {
+        // setting up our buffers
+        wchar_t drivePath[5] = { i, L':', L'\\', L'\\', L'\0' };
+        ULARGE_INTEGER freeBytesAvailable;
+        ULARGE_INTEGER totalNumberOfBytes;
+        ULARGE_INTEGER totalNumberOfFreeBytes;
+
+        if (!GetDiskFreeSpaceExW(drivePath, &freeBytesAvailable, &totalNumberOfBytes, &totalNumberOfFreeBytes)) {
+          outputBuffer << RED << "ERROR: Failed to fetch info for Drive " << i << "\n" << RESET_TEXT;
+          continue;
+        }
+        outputBuffer << "  " << (char)i << "-Drive: " << "\n";
+        outputBuffer << "     Drive size: " << bytesToReadableString((double)totalNumberOfBytes.QuadPart) << "\n";
+        outputBuffer << "     Free space: " << bytesToReadableString((double)totalNumberOfFreeBytes.QuadPart) << "\n";
+        outputBuffer << "     Space available: " << bytesToReadableString((double)freeBytesAvailable.QuadPart) << "\n";
+
+      }
+      driveBitmask = driveBitmask >> 1;
+    }
+
+    return outputBuffer.str();
+  }
 };
 
 

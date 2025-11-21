@@ -62,15 +62,15 @@ public:
       if (startingDirectory.empty() and !desiredFile.empty()) { startingDirectory = nonFlags[0]; } // If only -F was specified, assume remaining non-flag is the starting directory
       else if (!startingDirectory.empty() and desiredFile.empty()) { desiredFile = nonFlags[0]; }  // If only -D was specified, assume remaining non-flag is the desired file
       else if (startingDirectory.empty() and desiredFile.empty()) {
-        startingDirectory = nonFlags[0];
-        desiredFile = nonFlags[1];
+        startingDirectory = nonFlags[1];
+        desiredFile = nonFlags[0];
       }
     }
     catch (const std::out_of_range& e){
       throw std::invalid_argument("Invalid arguments. Didn't specify the starting directory or desired file");
     }
 
-    if (!matchDirectories and !matchFiles) { matchDirectories = true; matchFiles = true; }
+    if (!matchDirectories and !matchFiles) { matchFiles = true; }
   }
 
 

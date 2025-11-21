@@ -1,7 +1,7 @@
 #pragma once
 
 // this will contain import statements for every builtin command. Use to reduce the amount of imports in files that need access to all commands
-// #import "BuiltinCommands/ExampleCommand/<ClassName>"
+// #import "BuiltinCommands/<CommandFolder>/<ClassName>"
 #include "../TerminalFormatting.h"
 #include "BuiltinCommands/ExampleCommand/ExampleCommand.h"
 #include "BuiltinCommands/ExampleCommand2/ExampleCommand2.h"
@@ -18,6 +18,7 @@
 #include "BuiltinCommands/Man/Man.h"
 #include "BuiltinCommands/PrintWorkingDirectory/PrintWorkingDirectory.h"
 #include "BuiltinCommands/SystemInfo/SystemInfo.h"
+#include "BuiltinCommands/Date/Date.h"
 
 
 using std::string;

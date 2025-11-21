@@ -16,6 +16,7 @@ std::unique_ptr<T> createInstance(vector<string>& tokenizedInput) {
   return std::make_unique<T>(tokenizedInput); // T must be a class type that takes in a vector of strings
 }
 
+
 template <typename T>
 vector<string> validateAndExecuteCommand(vector<string>& tokenizedInput) {
   vector<string> input;
@@ -28,7 +29,7 @@ vector<string> validateAndExecuteCommand(vector<string>& tokenizedInput) {
   static_assert(is_base_of<Command<T>, T>::value, "T must inherit CommandBase");
 
   unique_ptr<T> instance = createInstance<T>(input);
-  if (!instance) { return {"Failed to create command object", "error"}; }
+  if (!instance) { return {"Failed to create command object", "500"}; }
   Command<T>* basePtr = instance.get();
   return basePtr->executeCommand();
 }

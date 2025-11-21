@@ -179,6 +179,7 @@ private:
     int newCursorX; // for when we have to update cursorY
     string supportLine; // for dealing with newline changes
 
+    // control keybinds
     if (keyEvent.dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) {
       switch (keyEvent.wVirtualKeyCode) {
         case 'X': case 'x': // Ctrl+x
@@ -198,6 +199,8 @@ private:
           break;
       }
     }
+
+    // normal key events
     else {
       switch (keyEvent.wVirtualKeyCode) {
         case VK_LEFT:
@@ -243,33 +246,6 @@ private:
         case VK_ESCAPE:
           exitFilePrompt();
           break;
-
-        // case VK_CONTROL:
-        //   INPUT_RECORD record;
-        //   DWORD eventsRead;
-        //   PeekConsoleInput(inputConsoleHandle, &record, 1, &eventsRead); // look at the next item in the buffer to see what it is
-        //
-        //   if (record.EventType == KEY_EVENT and record.Event.KeyEvent.bKeyDown) {
-        //     ReadConsoleInput(inputConsoleHandle, &record, 1, &eventsRead); // read in from the buffer so we don't pick up another character
-        //     KEY_EVENT_RECORD secondKeyEvent = record.Event.KeyEvent;
-        //
-        //     switch (secondKeyEvent.wVirtualKeyCode) {
-        //       case 'X': case 'x': // Ctrl+x
-        //         exitFilePrompt();
-        //         break;
-        //
-        //       case 'Q': case 'q': // Ctrl+q (detecting killSwitch because GetAsyncKeyState doesn't really work with how I set things up)
-        //         killSwitchScreen();
-        //         break;
-        //
-        //       default: // undefined
-        //         break;
-        //     }
-        //   }
-        //   else { // ctrl+s  because the windows console is stupid and only returns a ctrl event instead of another letter like the others
-        //     try { saveBufferToFile(); saved = true; }   // still experiencing a bug where the next input in the buffer after ctrl+s gets consumed
-        //     catch (string& e) { editError(e); }
-        //   } break;
 
         default:
           writeCharToFileInfo(ch);
