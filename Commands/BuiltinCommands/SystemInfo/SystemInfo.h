@@ -300,11 +300,11 @@ private:
     }
 
     DWORD requiredSize = driveQueryHeader.Size; // now we have the size of the full query, which we can use to make a proper buffer
-    vector<BYTE> buffer(requiredSize);
+    vector<BYTE> properBuffer(requiredSize); // note to self: buffer.data() will return a pointer to the start of the buffer
 
     // now we can call it with our proper buffer that will contain everything from the call.
     if (!DeviceIoControl(diskHandle, IOCTL_STORAGE_QUERY_PROPERTY, &driveQuery, sizeof(driveQuery),
-      buffer.data(), requiredSize, &bytesReturned, nullptr))
+      properBuffer.data(), requiredSize, &bytesReturned, nullptr))
     {
       std::stringstream errorMsg;
       errorMsg << RED << "\nERROR: Failed to get physical drive info for \\\\.\\PhysicalDrive" + std::to_string(driveIndex) << "\n" << RESET_TEXT;
@@ -312,7 +312,7 @@ private:
     }
 
     // now we just have to redefine the buffer so the compiler knows it contains a STORAGE_DEVICE_DESCRIPTOR
-    STORAGE_DEVICE_DESCRIPTOR* driveDescriptor = reinterpret_cast<STORAGE_DEVICE_DESCRIPTOR*>(buffer.data());
+    STORAGE_DEVICE_DESCRIPTOR* driveDescriptor = reinterpret_cast<STORAGE_DEVICE_DESCRIPTOR*>(properBuffer.data());
 
 
 
@@ -323,19 +323,20 @@ private:
     // after the STORAGE_DEVICE_DESCRIPTOR object in the buffer (stupid, I know).
     string model;
     if (driveDescriptor->ProductIdOffset != 0) { // extracting the Product ID, which contains the model of our drive
-      model = reinterpret_cast<const char*>(sizeof(buffer) + driveDescriptor->ProductIdOffset);
-    } else { model = "UnknownModel"; }
-    outputBuffer << "    Drive Model: " << model << "\n";
+      model = reinterpret_cast<const char*>(properBuffer.data() + driveDescriptor->ProductIdOffset);
+    } else { model = "Unknown Model"; }
+    outputBuffer << "     Drive Model: " << model << "\n";
 
     string vendor;
     if (driveDescriptor->VendorIdOffset != 0) { // extracting the Product ID, which contains the model of our drive
-      vendor = reinterpret_cast<const char*>(sizeof(buffer) + driveDescriptor->VendorIdOffset);
-    } else { vendor = "UnknownVendor"; }
-    outputBuffer << "    Drive Vendor: " << vendor << "\n";
+      vendor = reinterpret_cast<const char*>(properBuffer.data() + driveDescriptor->VendorIdOffset);
+    } else { vendor = "Unknown Vendor"; }
+    outputBuffer << "     Drive Vendor: " << vendor << "\n";
 
-    if (driveDescriptor->RemovableMedia) { outputBuffer << "    Removable Media\n"; }
-    else { outputBuffer << "    Installed Media\n"; }
+    if (driveDescriptor->RemovableMedia) { outputBuffer << "     Removable Media\n"; }
+    else { outputBuffer << "     Installed Media\n"; }
 
+    return outputBuffer.str();
   }
 
 
