@@ -8,7 +8,6 @@
 #include <psapi.h>
 
 // ===================={ System Info Command }====================
-// TODO: add documentation to the manual file so James knows what flags and other info you implemented
 
 
 class SystemInfo : public Command<SystemInfo> { // Command class needs to be inherited in order to work!!!
@@ -18,6 +17,7 @@ class SystemInfo : public Command<SystemInfo> { // Command class needs to be inh
   bool getMemory;
   bool getPerformance;
   bool getDrive;
+
 
 public:
   explicit SystemInfo(vector<string>& tokens) {
@@ -29,9 +29,9 @@ public:
     getDrive = false;
   }
 
-  static string returnManText() {
-    return SystemInfoManual;
-  }
+
+  static string returnManText() { return SystemInfoManual; }
+
 
   static bool validateSyntax(vector<string>& tokens) {
     if (tokens.empty()) { return true; }
@@ -40,6 +40,7 @@ public:
     }
     return true;
   }
+
 
   vector<string> executeCommand() override {
     setFlags();
@@ -51,21 +52,13 @@ public:
       outputBuffer << WHITE << "\n====={ Architecture Information }=====\n" << RESET_TEXT;
       outputBuffer << getArchitectureInfo(system_info);
     }
-    if (getCpu) {
-      outputBuffer << getCpuInfo(system_info);
-    }
-    if (getMemory) {
-      outputBuffer << getMemoryInfo();
-    }
-    if (getDrive) {
-      outputBuffer << getDriveInfo();
-    }
-    if (getPerformance) {
-      outputBuffer << getPerformanceInfo();
-    }
-
+    if (getCpu) { outputBuffer << getCpuInfo(system_info); }
+    if (getMemory) { outputBuffer << getMemoryInfo(); }
+    if (getDrive) { outputBuffer << getDriveInfo(); }
+    if (getPerformance) { outputBuffer << getPerformanceInfo(); }
     return {outputBuffer.str(), "200"};
   }
+
 
 private:
   void setFlags() {
@@ -92,6 +85,7 @@ private:
   }
 
 
+
   static string getArchitectureInfo(SYSTEM_INFO system_info) {
     // deciphering the architecture
     switch (system_info.wProcessorArchitecture) {
@@ -111,6 +105,7 @@ private:
   }
 
 
+
   static string getCpuInfo(SYSTEM_INFO system_info) {
     std::stringstream outputBuffer;
 
@@ -127,9 +122,7 @@ private:
 
     // now we can pass in our buffer and get the info we need!
     if (!GetLogicalProcessorInformation(buffer.data(), &len)) {
-      std::stringstream errorMsg;
-      errorMsg << RED << "\nERROR: Failed to get core info \n" << RESET_TEXT;
-      return errorMsg.str();
+      return colorText("\nERROR: Failed to get core info \n", RED);
     }
 
     int physicalCores = 0;
@@ -157,13 +150,14 @@ private:
   }
 
 
+
   static string getMemoryInfo() {
     std::stringstream outputBuffer;
 
     MEMORYSTATUSEX memoryState = {};
     memoryState.dwLength = sizeof(memoryState);
     if (!GlobalMemoryStatusEx(&memoryState)) {
-      return outputBuffer.str() + RED + "\nERROR: Failed to get memory status \n" + RESET_TEXT;
+      return colorText("\nERROR: Failed to get memory status \n", RED);
     }
     outputBuffer << WHITE << "\n====={ Memory Information }=====\n" << RESET_TEXT;
     outputBuffer << "  Memory Usage: " << memoryState.dwMemoryLoad << "%\n";
@@ -173,21 +167,21 @@ private:
   }
 
 
+
+  // similar to the other functions, where we query windows and output what was returned
   static string getPerformanceInfo() {
     PERFORMANCE_INFORMATION performanceInfo;
     performanceInfo.cb = sizeof(PERFORMANCE_INFORMATION);
 
     if (!GetPerformanceInfo(&performanceInfo, performanceInfo.cb)) {
-      std::stringstream errorMsg;
-      errorMsg << RED << "\nERROR: Failed to get performance info \n" << RESET_TEXT;
-      return errorMsg.str();
+      return colorText("\nERROR: Failed to get performance info \n", RED);
     }
-
+    // a lot of the returned info is in pages, so we use this to convert it to bytes.
     auto pgSize = (double)performanceInfo.PageSize;
 
     std::stringstream outputBuffer;
     outputBuffer << WHITE << "\n====={ Performance Information }=====\n" << RESET_TEXT;
-    outputBuffer << "  Page Size: " << bytesToReadableString((double)performanceInfo.PageSize) << "\n";
+    outputBuffer << "  Page Size: " << bytesToReadableString(pgSize) << "\n";
     outputBuffer << "  Committed Pages: " << performanceInfo.CommitTotal << " pages\n";
     outputBuffer << "  Current Page Limit: " << performanceInfo.CommitLimit << " pages\n";
     outputBuffer << "  Allocated Kernel Memory: " << bytesToReadableString((double)performanceInfo.KernelTotal * pgSize) << "\n";
@@ -201,23 +195,15 @@ private:
   }
 
 
+
   static string getDriveInfo() {
-    // Querying the drives available.
-    // GetLogicalDrives returns a bitmask that represents disk drives that are currently available
-    // Bit position 0 (the least-significant bit) is drive A, bit position 1 is drive B, bit position 2 is drive C, and so on.
-    DWORD driveBitmask = GetLogicalDrives();
-
-    if (!driveBitmask) {
-      std::stringstream errorMsg;
-      errorMsg << RED << "\nERROR: Failed to get drive/disk info \n" << RESET_TEXT;
-      return errorMsg.str();
-    }
-
     std::stringstream outputBuffer;
-    outputBuffer << WHITE << "\n====={ Drive Information }=====\n" << RESET_TEXT;
 
-
-    // getting physical drive information
+    outputBuffer << WHITE << "\n====={ Physical Drive Information }=====\n" << RESET_TEXT;
+    // windows path to a physical drive will always look like \\.\PhysicalDrive<number>
+    // each physical drive filepath is stored in sequence, so the first drive will be located at \\.\PhysicalDrive0, the next at \\.\PhysicalDrive1, and so on
+    // Most computers can only store up to 32 drives, which is why our loop stops there.
+    // view getPhysicalDriveInfo function for more information about how we obtain the drive information
     for (int i = 0; i < 32; i++) {
       string physicalDriveOutput = getPhysicalDriveInfo(i);
       if (physicalDriveOutput == "") { break; }
@@ -225,23 +211,29 @@ private:
     }
 
 
+    outputBuffer << WHITE << "\n====={ Drive Partition Information }=====\n" << RESET_TEXT;
+    // looping through all the characters from A to Z and shifting the bitmask, so the char i will correspond to the correct drive
+    // Querying the drives available.
+    // GetLogicalDrives returns a bitmask that represents disk drives that are currently available
+    // Bit position 0 (the least-significant bit) is drive A, bit position 1 is drive B, bit position 2 is drive C, and so on.
+    DWORD driveBitmask = GetLogicalDrives();
+    if (!driveBitmask) { return colorText("\nERROR: Failed to get drive info \n", RED); }
+
     for (wchar_t i = 'A'; i <= 'Z'; i++) {
       if (driveBitmask & 1) {
         // setting up our buffers
-        wchar_t drivePath[5] = { i, L':', L'\\', L'\\', L'\0' };
+        wchar_t drivePath[5] = { i, L':', L'\\', L'\\', L'\0' }; // because the function we call next needs to take in a pointer to a list of wide characters
         ULARGE_INTEGER freeBytesAvailable;
         ULARGE_INTEGER totalNumberOfBytes;
         ULARGE_INTEGER totalNumberOfFreeBytes;
 
         if (!GetDiskFreeSpaceExW(drivePath, &freeBytesAvailable, &totalNumberOfBytes, &totalNumberOfFreeBytes)) {
-          outputBuffer << RED << "ERROR: Failed to fetch info for Drive " << i << "\n" << RESET_TEXT;
-          continue;
+          outputBuffer << RED << "  ERROR: Failed to fetch info for Drive " << i << "\n" << RESET_TEXT; continue;
         }
         outputBuffer << "  " << (char)i << "-Drive: " << "\n";
-        outputBuffer << "     Drive size: " << bytesToReadableString((double)totalNumberOfBytes.QuadPart) << "\n";
+        outputBuffer << "     Partition size: " << bytesToReadableString((double)totalNumberOfBytes.QuadPart) << "\n";
         outputBuffer << "     Free space: " << bytesToReadableString((double)totalNumberOfFreeBytes.QuadPart) << "\n";
         outputBuffer << "     Space available: " << bytesToReadableString((double)freeBytesAvailable.QuadPart) << "\n";
-
       }
       driveBitmask = driveBitmask >> 1;
     }
@@ -294,9 +286,7 @@ private:
             &bytesReturned, // the number of bytes that were filled in our output buffer
             nullptr)) // last parameter is for asynchronous calls. I didn't dive in too deep because it's not needed
     {
-      std::stringstream errorMsg;
-      errorMsg << RED << "\nERROR: Failed to get physical drive info for \\\\.\\PhysicalDrive" + std::to_string(driveIndex) << "\n" << RESET_TEXT;
-      return errorMsg.str();
+      return colorText("\nERROR: Failed to get physical drive info for \\\\.\\PhysicalDrive" + std::to_string(driveIndex) + "\n", RED);
     }
 
     DWORD requiredSize = driveQueryHeader.Size; // now we have the size of the full query, which we can use to make a proper buffer
@@ -306,33 +296,33 @@ private:
     if (!DeviceIoControl(diskHandle, IOCTL_STORAGE_QUERY_PROPERTY, &driveQuery, sizeof(driveQuery),
       properBuffer.data(), requiredSize, &bytesReturned, nullptr))
     {
-      std::stringstream errorMsg;
-      errorMsg << RED << "\nERROR: Failed to get physical drive info for \\\\.\\PhysicalDrive" + std::to_string(driveIndex) << "\n" << RESET_TEXT;
-      return errorMsg.str();
+      return colorText("\nERROR: Failed to get physical drive info for \\\\.\\PhysicalDrive" + std::to_string(driveIndex) + "\n", RED);
     }
 
     // now we just have to redefine the buffer so the compiler knows it contains a STORAGE_DEVICE_DESCRIPTOR
     STORAGE_DEVICE_DESCRIPTOR* driveDescriptor = reinterpret_cast<STORAGE_DEVICE_DESCRIPTOR*>(properBuffer.data());
 
 
-
-    outputBuffer << "  PhysicalDrive" << driveIndex << ": " << "\n";
-
     // now windows was silly, and decided that the function wouldn't actually include information like the
     // VendorId or ProductId in the structure. Instead, they included offsets to the actual information, which is stored
     // after the STORAGE_DEVICE_DESCRIPTOR object in the buffer (stupid, I know).
+    outputBuffer << "  PhysicalDrive" << driveIndex << ": " << "\n";
+
+    // extracting the Product ID, which contains the model of our drive
     string model;
-    if (driveDescriptor->ProductIdOffset != 0) { // extracting the Product ID, which contains the model of our drive
+    if (driveDescriptor->ProductIdOffset != 0) {
       model = reinterpret_cast<const char*>(properBuffer.data() + driveDescriptor->ProductIdOffset);
     } else { model = "Unknown Model"; }
     outputBuffer << "     Drive Model: " << model << "\n";
 
+    // extracting the Product ID, which contains the model of our drive. My SSD drives dont have this for some reason
     string vendor;
-    if (driveDescriptor->VendorIdOffset != 0) { // extracting the Product ID, which contains the model of our drive
+    if (driveDescriptor->VendorIdOffset != 0) {
       vendor = reinterpret_cast<const char*>(properBuffer.data() + driveDescriptor->VendorIdOffset);
     } else { vendor = "Unknown Vendor"; }
     outputBuffer << "     Drive Vendor: " << vendor << "\n";
 
+    // detecting if the drive is a USB
     if (driveDescriptor->RemovableMedia) { outputBuffer << "     Removable Media\n"; }
     else { outputBuffer << "     Installed Media\n"; }
 

@@ -73,5 +73,11 @@ protected: // like private, but it allows child classes to inherit the methods
       return numStr + " " + units;
     }
 
+    // surrounds the string with the corresponding color
+    static string colorText(string message, std::string_view color) {
+      std::stringstream formattedMessage;
+      formattedMessage << color << message << RESET_TEXT;
+      return formattedMessage.str();
+    }
 };
 

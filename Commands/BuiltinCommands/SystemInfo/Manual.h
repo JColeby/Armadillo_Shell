@@ -12,6 +12,7 @@ const std::string SystemInfoManual = R"(SystemInfo Command:
         -c      displays cpu information
         -m      displays memory information
         -p      displays performance information
+        -d      displays drive information
 
     Will display all options if no flags are provided
 )";
