@@ -1,9 +1,11 @@
 #pragma once
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include "../../Command.h"
 #include "Manual.h"
+#include "../../Handlers/inputHandler.h"
 
 
 
@@ -30,12 +32,28 @@ public:
         // in the execute command itself.
         // tokens should contain all of the command inputs the user provided
         // in order. However, It will not contain the command at the start.
-        return true;
+        if(tokens.size() != 0){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     vector<string> executeCommand() override {
         // TODO: implement
         // Will assume validateSyntax was already called, but add error handling just in case
+        std::ifstream inputFile(tokenizedCommand[0]);
+        if(!inputFile){
+            std::cerr << "Error opening file!" << std::endl;
+            return {"Unable to open file", "400"};
+        }
+
+        std::string line;
+        while(std::getline(inputFile, line)){
+            inputHandler(line);
+        }
+
         return {"Test command was able to execute successfully!", "200"}; ;;
     }
 
