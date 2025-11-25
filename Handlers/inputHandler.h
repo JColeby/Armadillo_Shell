@@ -7,16 +7,13 @@
 #include <thread>
 #include <chrono>
 
-#include "commandHandler.h"
-#include "pipeHandler.h"
-
 using std::string;
 using std::vector;
 using std::cout;
 using std::endl;
 using std::cerr;
 
-
+void inputHandler(const string& userInput);
 
 void printBadCommandResult(const vector<string>& commandOutput);
 
@@ -24,4 +21,13 @@ void displayOutput(const vector<string>& commandOutput);
 
 vector<string> tokenizeInput(const string& inputString);
 
-void inputHandler(const string& userInput) ;
+
+#include "commandHandler.h"
+#include "pipeHandler.h"
+
+
+
+
+
+
+

@@ -1,11 +1,12 @@
 #pragma once
+#include "../../../Handlers/inputHandler.h"
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include "../../Command.h"
 #include "Manual.h"
-#include "../../Handlers/inputHandler.h"
+
 
 
 

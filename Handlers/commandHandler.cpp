@@ -1,5 +1,4 @@
-#include  "commandHandler.h"
-
+#include "commandHandler.h"
 
 vector<string> commandHandler(vector<string>& tokenizedInput) {
     const string command = tokenizedInput[0];

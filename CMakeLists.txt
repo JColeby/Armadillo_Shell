@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Shared source files
 # -----------------------
 set(SHELL_SOURCES
-        Handlers/commandHandler.cpp
         Handlers/inputHandler.cpp
         Handlers/pipeHandler.cpp
         Globals/GlobalFlags.cpp

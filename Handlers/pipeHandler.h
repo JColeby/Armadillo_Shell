@@ -3,7 +3,6 @@
 #include <iostream>
 #include <vector>
 
-#include "commandHandler.h"
 
 
 using std::string;
@@ -12,3 +11,5 @@ using std::cout;
 using std::endl;
 
 vector<string> pipeHandler(const vector<string>& tokenizedInput);
+
+#include "commandHandler.h"
