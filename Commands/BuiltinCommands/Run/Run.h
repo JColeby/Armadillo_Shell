@@ -33,12 +33,8 @@ public:
         // in the execute command itself.
         // tokens should contain all of the command inputs the user provided
         // in order. However, It will not contain the command at the start.
-        if(tokens.size() != 0){
-            return true;
-        }
-        else{
-            return false;
-        }
+        if(tokens.size() != 0){ return true; }
+        else { return false; }
     }
 
     vector<string> executeCommand() override {
@@ -46,7 +42,6 @@ public:
         // Will assume validateSyntax was already called, but add error handling just in case
         std::ifstream inputFile(tokenizedCommand[0]);
         if(!inputFile){
-            std::cerr << "Error opening file!" << std::endl;
             return {"Unable to open file", "400"};
         }
 
@@ -55,7 +50,7 @@ public:
             inputHandler(line);
         }
 
-        return {"Test command was able to execute successfully!", "200"}; ;;
+        return {"Test command was able to execute successfully!", "200"};
     }
 
 private:
