@@ -1,5 +1,7 @@
 #include "commandHandler.h"
 
+
+// calls validateAndExecuteCommand and passes in the class associated with the command
 vector<string> commandHandler(vector<string>& tokenizedInput) {
     const string command = tokenizedInput[0];
     if (command == "clear") { system("cls"); return {"Screen Cleared", "201"}; }

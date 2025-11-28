@@ -11,7 +11,10 @@ using std::string;
 using std::vector;
 using std::cout;
 using std::endl;
+using std::vector;
 using std::cerr;
+
+inline bool containsPipe;
 
 void inputHandler(const string& userInput);
 
@@ -19,7 +22,7 @@ void printBadCommandResult(const vector<string>& commandOutput);
 
 void displayOutput(const vector<string>& commandOutput);
 
-vector<string> tokenizeInput(const string& inputString);
+vector<string> tokenizeInput(const string& inputString, bool removeQuotes);
 
 
 #include "commandHandler.h"

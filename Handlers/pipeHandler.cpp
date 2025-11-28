@@ -7,5 +7,5 @@ vector<string> pipeHandler(const vector<string>& tokenizedInput) {
           break;
         }
     }
-    return {"command output", "error code as a string", "test"}; ;;
+    return {"command output", "error code as a string", "test"};
 }

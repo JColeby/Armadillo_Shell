@@ -32,9 +32,10 @@ int main() {
     cout << WHITE;
     cout << "     -  press ctrl+q to terminate any active command" << endl
          << "     -  use 'exit' command to close the shell" << endl << endl;
-    int exitCode = inputLoop();
-    system("cls");
 
+    int exitCode = inputLoop(); // going to the main loop
+
+    system("cls");  // clears the screen
     return exitCode;
 }
 
