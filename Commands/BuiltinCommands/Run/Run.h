@@ -19,11 +19,13 @@
 class Run : public Command<Run> { // Command class needs to be inherited in order to work!!!
   vector<string> tokenizedCommand;
   std::map<string, string> varMap;
+  int lineNumber;
   // add more class variables as needed.
 
 public:
     explicit Run(vector<string>& tokens) {
         tokenizedCommand = tokens; // should save arguments in the order they were passed in
+        lineNumber = 1;
     }
 
     static string returnManText() {
@@ -53,12 +55,14 @@ public:
           string line;
           while(std::getline(inputFile, line)){
             interpretLine(line);
+            lineNumber++;
           }
         }
-        catch (const exception& e) {
-          return {e.what(), "500"};
+        catch (const runtime_error& e) {
+          stringstream ss;
+          ss << "Script Error on line " << lineNumber << ": \n  " << e.what();
+          return {colorText( ss.str(), YELLOW), "200"};
         }
-
         return {"Script ran successfully", "201"};
     }
 
@@ -76,7 +80,7 @@ private:
         for (int i = 2; i < tokenizedLine.size(); i++) { input.push_back(tokenizedLine[i]); }
         vector<string> result = evaluate(input);
         if (result[1][0] != '2') {
-          throw runtime_error("Script Error, variable malformed (" + result[1] + ") : " + result[0]);
+          throw runtime_error("Command result returned error code of " + result[1] + " and is unable to be set to a variable \n  Error Message: " + result[0]);
         }
         varMap[tokenizedLine[0]] = result[0];
         return;
@@ -97,15 +101,23 @@ private:
         return evaluatedCommand;
       }
 
-      replaceVarAndRemoveQuotes(statement);
-      string result = statement[0];
+
       if (statement.size() % 2 == 0) {
         throw runtime_error("Improper string addition");
       }
-      for (int i = 1; i < statement.size(); i += 2) {
-        if (statement[i] != "+") { throw runtime_error("Improper string addition"); }
-        result += statement[i+1];
+      string result;
+      for (int i = 0; i < statement.size(); i++) {
+        if (i % 2 == 0) {
+          if (statement[i][0] == '$' or statement[i][0] == '"') {
+            vector<string> token = {statement[i]};
+            replaceVarAndRemoveQuotes(token);
+            result += token[0];
+          }
+          else { throw runtime_error("Invalid token: " + statement[i]); }
+        }
+        else if (statement[i] != "+") { throw runtime_error("Improper string addition"); }
       }
+
       return {result, "200"};
 
     }
@@ -113,15 +125,16 @@ private:
 
     void replaceVarAndRemoveQuotes(vector<string>& statement) {
       for (string & word : statement) {
-        if (word[0] == '$') {
+        if (!word.empty() and word[0] == '$') {
           if (varMap.find(word) == varMap.end()) {
             throw runtime_error(word + " is not defined");
           }
           word = varMap[word];
         }
-        if (!word.empty() && word[0] == '"') {
+        else if (!word.empty() and word[0] == '"') {
           if (word.size() >= 2 && word.back() == '"') {
             word = word.substr(1, word.size() - 2);
+            word = replaceAll(word, "\\n", "\n");
           } else {
             throw runtime_error("Malformed quoted string");
           }
@@ -129,6 +142,16 @@ private:
       }
     }
 
+
+
+  static string replaceAll(string subject, const string& search, const string& replace) {
+      size_t pos = 0;
+      while ((pos = subject.find(search, pos)) != string::npos) {
+        subject.replace(pos, search.length(), replace);
+        pos += replace.length();
+      }
+      return subject;
+    }
     // put your own method definitions here
 };
 
