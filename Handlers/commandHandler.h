@@ -4,7 +4,7 @@
 #include <vector>
 
 
-std::vector<std::string> commandHandler(std::vector<std::string>& tokenizedInput);
+std::vector<std::string> commandHandler(std::vector<std::string>& tokenizedInput, bool validateOnly);
 
 
 #include "../Commands/validateAndExecuteCommand.h"

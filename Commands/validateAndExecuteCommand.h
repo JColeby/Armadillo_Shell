@@ -11,13 +11,14 @@ using std::unique_ptr;
 
 
 template <typename T>
-vector<string> validateAndExecuteCommand(vector<string>& tokenizedInput) {
+vector<string> validateAndExecuteCommand(vector<string>& tokenizedInput, bool validateOnly) {
   vector<string> input; // removing the first string from the vector
   for (int i = 1; i < tokenizedInput.size(); i++) { input.push_back(tokenizedInput[i]); }
 
   if (!T::validateSyntax(input)) { // validating syntax
     return {"Invalid command syntax/input. Information about correct syntax can be found by running 'man " + tokenizedInput[0] + "'", "4"};
   }
+  if (validateOnly) { return {"valid syntax", "200"}; }
 
   // make sure the class passed in inherits the Command class
   static_assert(is_base_of<Command<T>, T>::value, "T must inherit CommandBase");

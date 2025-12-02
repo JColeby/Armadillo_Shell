@@ -1,6 +1,7 @@
 #include "inputHandler.h"
 #include "../TerminalFormatting.h"
-
+#include "commandHandler.h"
+#include "pipeHandler.h"
 
 using namespace VT;
 
@@ -85,5 +86,5 @@ void inputHandler(const string& userInput) {
   containsPipe = false;
   vector<string> tokens = tokenizeInput(userInput, true);
   if (containsPipe) { displayOutput(pipeHandler(tokens)); }
-  else { displayOutput(commandHandler(tokens)); }
+  else { displayOutput(commandHandler(tokens, false)); }
 }

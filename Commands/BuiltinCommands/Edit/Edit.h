@@ -80,7 +80,7 @@ public:
     try {
       if (std::filesystem::exists(tokenizedCommand[0])) { readFileToBuffer(); } // if file already exists
       else { saved = false; } // if there isn't an existing file
-      if (fileContent.empty()) { fileContent.push_back(""); }
+      if (fileContent.empty()) { fileContent.emplace_back(""); }
 
       // setting up the terminal for editing
       // disabling ENABLE_LINE_INPUT prevents the editor from automatically processing newline characters.
@@ -118,7 +118,7 @@ private:
       string line;
       while (getline(file, line)) { fileContent.push_back(line); }
     }
-    else { throw "File failed to open"; }
+    else { throw runtime_error("File failed to open"); }
   }
 
 
@@ -128,7 +128,7 @@ private:
     if (file.is_open()) {
       for (string line : fileContent) { file << line << endl; }
     }
-    else { throw "File failed to open"; }
+    else { throw runtime_error("File failed to open"); }
   }
 
 
@@ -174,6 +174,7 @@ private:
     }
   }
 
+
   void keyEventOptions(KEY_EVENT_RECORD keyEvent) {
     char ch = keyEvent.uChar.AsciiChar; // get the character of the key that was pressed
     int newCursorX; // for when we have to update cursorY
@@ -192,14 +193,13 @@ private:
 
         case 'O': case 'o': // saves the file. I gave up on ctrl+s because windows is f***ing stupid and inconsistent
           try { saveBufferToFile(); saved = true; }
-          catch (string& e) { editError(e); }
+          catch (runtime_error& e) { editError(e.what()); }
           break;
 
         default:
           break;
       }
     }
-
     // normal key events
     else {
       switch (keyEvent.wVirtualKeyCode) {
@@ -379,8 +379,8 @@ private:
       if (keyPressed == 'c') { return; }
       if (keyPressed == 'y') {
         try { saveBufferToFile(); saved = true; }
-        catch (string e) {
-          editError(e);
+        catch (runtime_error& e) {
+          editError(e.what());
           exitFilePrompt(); // calls itself again so the user can retry if needed
           return;
         }
@@ -416,8 +416,6 @@ private:
 
   // will return one of the keys in the provided vector when it is pressed. Will wait until one of the keys is pressed
   int returnKeyPress(vector<int> keys, bool anyKey=false) {
-    // FlushConsoleInputBuffer(inputConsoleHandle); // flushes the buffer so we don't pick up keys that were pressed before calling
-
     while (true) { // code is the same as what's in editFile. Look there for more information
       DWORD result = WaitForSingleObject(inputConsoleHandle, INFINITE);
       if (result == WAIT_OBJECT_0) {
