@@ -19,6 +19,7 @@
 #include "BuiltinCommands/PrintWorkingDirectory/PrintWorkingDirectory.h"
 #include "BuiltinCommands/SystemInfo/SystemInfo.h"
 #include "BuiltinCommands/Date/Date.h"
+#include "BuiltinCommands/Command/Cmd.h"
 
 
 using std::string;

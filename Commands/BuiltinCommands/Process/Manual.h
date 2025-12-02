@@ -10,6 +10,5 @@ const std::string ProcessManual = R"(Process Command:
     Flags:
         -h      hides duplicate processes that are from the same executable
         -f      displays the full filepath
-        -p      displays performance information instead
 
 )";
