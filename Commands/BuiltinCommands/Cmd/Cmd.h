@@ -29,7 +29,7 @@ public:
   vector<string> executeCommand() override {
     stringstream commands;
     commands << WHITE << "File and Directory Commands: " << RESET_TEXT;
-    commands << "cd, cp, edit, find, mkdir, ls, pwd, rm" << endl;
+    commands << "cat, cd, cp, edit, find, mkdir, ls, pwd, rm" << endl;
     commands << WHITE << "System Commands: " << RESET_TEXT;
     commands << "date, ps, run, sys" << endl;
     commands << WHITE << "Informative Commands: " << RESET_TEXT;

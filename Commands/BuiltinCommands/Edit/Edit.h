@@ -74,9 +74,6 @@ public:
     // Saving the current console mode so we can revert back to it later
     GetConsoleMode(inputConsoleHandle, &startingMode);
 
-    //TODO: remove this after testing silly!
-    if (tokenizedCommand[0] == "t") { tokenizedCommand = {"Commands/BuiltinCommands/Edit/testing.txt"}; }
-
     try {
       if (std::filesystem::exists(tokenizedCommand[0])) { readFileToBuffer(); } // if file already exists
       else { saved = false; } // if there isn't an existing file

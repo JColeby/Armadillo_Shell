@@ -22,6 +22,8 @@ vector<string> commandHandler(vector<string>& tokenizedInput, bool validateOnly)
     if (command == "find") { return validateAndExecuteCommand<Find>(tokenizedInput, validateOnly); }
     if (command == "sys" or command == "systemInfo") { return validateAndExecuteCommand<SystemInfo>(tokenizedInput, validateOnly); }
     if (command == "date") { return validateAndExecuteCommand<Date>(tokenizedInput, validateOnly); }
-    if (command == "cmd" or command == "command") { return validateAndExecuteCommand<Cmd>(tokenizedInput, validateOnly); }
+    if (command == "cmd") { return validateAndExecuteCommand<Cmd>(tokenizedInput, validateOnly); }
+    if (command == "cat") { return validateAndExecuteCommand<Cat>(tokenizedInput, validateOnly); }
+
     return { "'" + tokenizedInput[0] + "' is not a valid command", "4"};
 }
