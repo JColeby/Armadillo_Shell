@@ -97,7 +97,7 @@ private:
         replaceVarAndRemoveQuotes(statement);
         vector<string> evaluatedCommand;
         if (containsPipe) { evaluatedCommand = pipeHandler(statement); }
-        else { evaluatedCommand = commandHandler(statement); }
+        else { evaluatedCommand = commandHandler(statement, false); }
         return evaluatedCommand;
       }
 

@@ -37,5 +37,5 @@ vector<string> pipeHandler(const vector<string>& tokenizedInput) {
       if (output[1][0] != '2') { return {"Error returned from input being piped to another command. \n  " + output[0], output[1]}; }
     }
 
-    return {"command output", "500"};
+    return output;
 }
