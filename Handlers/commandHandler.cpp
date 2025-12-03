@@ -24,6 +24,8 @@ vector<string> commandHandler(vector<string>& tokenizedInput, bool validateOnly)
     if (command == "date") { return validateAndExecuteCommand<Date>(tokenizedInput, validateOnly); }
     if (command == "cmd") { return validateAndExecuteCommand<Cmd>(tokenizedInput, validateOnly); }
     if (command == "cat") { return validateAndExecuteCommand<Cat>(tokenizedInput, validateOnly); }
+    if (command == "help") { return validateAndExecuteCommand<Help>(tokenizedInput, validateOnly); }
+
 
     return { "'" + tokenizedInput[0] + "' is not a valid command", "4"};
 }

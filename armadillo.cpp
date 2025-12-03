@@ -30,8 +30,7 @@ int main() {
     cout << BLUE << armadilloLogo << RESET_TEXT;
     cout << "##########################################################################################" << endl << endl;
     cout << WHITE;
-    cout << "     -  press ctrl+q to terminate any active command" << endl
-         << "     -  use 'exit' command to close the shell" << endl << endl;
+    cout << "     -  run 'help' for additional information about Armadillo" << endl << endl;
 
     int exitCode = inputLoop(); // going to the main loop
 

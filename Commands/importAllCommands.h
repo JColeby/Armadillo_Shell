@@ -21,6 +21,8 @@
 #include "BuiltinCommands/Process/Process.h"
 #include "BuiltinCommands/Run/Run.h"
 #include "BuiltinCommands/SystemInfo/SystemInfo.h"
+#include "BuiltinCommands/Help/Help.h"
+
 
 using std::string;
 using std::vector;
