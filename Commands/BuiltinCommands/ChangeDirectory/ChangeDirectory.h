@@ -2,45 +2,58 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <unistd.h>     // chdir, getcwd
+#include <limits.h>     // PATH_MAX
 #include "../../Command.h"
 #include "Manual.h"
 
-
-
 // ===================={ Change Directory Command }====================
-// TODO: add documentation to the manual file so James knows what flags and other info you implemented
 
-
-class ChangeDirectory : public Command<ChangeDirectory> { // Command class needs to be inherited in order to work!!!
-  vector<string> tokenizedCommand;
-  // add more class variables as needed.
+class ChangeDirectory : public Command<ChangeDirectory> {
+  std::vector<std::string> tokenizedCommand;
 
 public:
-  explicit ChangeDirectory(vector<string>& tokens) {
-    tokenizedCommand = tokens; // should save arguments in the order they were passed in
+  explicit ChangeDirectory(std::vector<std::string>& tokens) {
+    tokenizedCommand = tokens;
   }
 
-  static string returnManText() {
+  static std::string returnManText() {
     return ChangeDirectoryManual;
   }
 
-  static bool validateSyntax(vector<string>& tokens) {
-    // TODO: implement
-    // this should be a simple validation so it can be used when validating
-    // commands that are getting piped. More thorough validations can be done
-    // in the execute command itself.
-    // tokens should contain all of the command inputs the user provided
-    // in order. However, It will not contain the command at the start.
-    return true;
+  static bool validateSyntax(std::vector<std::string>& tokens) {
+    return tokens.size() <= 1;
   }
 
   vector<string> executeCommand() override {
-    // TODO: implement
-    // Will assume validateSyntax was already called, but add error handling just in case
-    return {"Not Implemented", "500"};
+    if (!validateSyntax(tokenizedCommand)) {
+      return { "cd: too many arguments", "400" };
+    }
+
+    const char* targetPath = nullptr;
+
+    // Case: "cd" with NO arguments → go HOME
+    if (tokenizedCommand.empty()) {
+      targetPath = getenv("HOME");
+      if (!targetPath) {
+        return { "cd: HOME not set", "500" };
+      }
+    }
+    // Case: "cd <path>"
+    else {
+      targetPath = tokenizedCommand[0].c_str();
+    }
+
+    if (chdir(targetPath) != 0) {
+      return { "cd: no such file or directory: " + tokenizedCommand[0], "404" };
+    }
+
+    // Return the new directory
+    char cwd[PATH_MAX];
+    if (!getcwd(cwd, sizeof(cwd))) {
+      return { "cd: changed directory but failed to get working directory", "500" };
+    }
+
+    return { string(cwd), "201" };
   }
-
-private:
-  // put your own method definitions here
 };
-

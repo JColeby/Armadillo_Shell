@@ -28,9 +28,11 @@ public:
     hideDuplicates = false;
   }
 
+
   static string returnManText() {
     return ProcessManual;
   }
+
 
   static bool validateSyntax(vector<string>& tokens) {
     if (tokens.empty()) { return true; }
@@ -40,11 +42,11 @@ public:
     return true;
   }
 
+
   vector<string> executeCommand() override {
     setFlags();
     return readProcesses();
   }
-
 
 
 
@@ -65,16 +67,17 @@ private:
   vector<string> readProcesses() {
     std::unordered_set<string> runningProcesses;
 
+    // getting the process ids for all active processes
     DWORD processes[1024], bytesReturned;
-
     if (!EnumProcesses(processes, sizeof(processes), &bytesReturned)) {
       return {"Failed to get processes. System error message: " + to_string(GetLastError()), "500"};
     }
 
-    unsigned int count = bytesReturned / sizeof(DWORD);
     std::stringstream outputBuffer;
     outputBuffer << WHITE << "PID:            Executable:\n" << RESET_TEXT;
 
+    // looping through each process id that was returned
+    unsigned int count = bytesReturned / sizeof(DWORD);
     for (unsigned int i = 0; i < count; ++i) {
 
       // getting the current process
@@ -88,7 +91,7 @@ private:
       if (!GetModuleFileNameExW(process, nullptr, exeName, MAX_PATH)) {
         wcscpy_s(exeName, L"[Access Denied]");
       }
-      string processName = utf8_encode(exeName); // encode it back to
+      string processName = utf8_encode(exeName); // encode it back to normal char characters
 
       // flag adjustments
       if (!fullFilepath) { processName = std::filesystem::path(processName).filename().string(); } // gets only the filename
@@ -97,48 +100,16 @@ private:
         else { CloseHandle(process); continue; }
       }
 
+      // save the process to the buffer
       string itemBuffer = "  " + to_string(pid);
       while (itemBuffer.size() < 16) { itemBuffer += " "; }
-      itemBuffer += "  " + processName + "\n";
-      outputBuffer << itemBuffer;
+      outputBuffer << itemBuffer << "  " << processName << "\n";
 
       CloseHandle(process);
     }
 
     return {outputBuffer.str(), "200"};
   }
-
-
-  // // Moved to SystemInfo
-  // vector<string> getPerformanceInfo() { // basically dumping the entire PERFORMANCE_INFORMATION structure
-  //   PERFORMANCE_INFORMATION performanceInfo;
-  //   performanceInfo.cb = sizeof(PERFORMANCE_INFORMATION);
-  //
-  //   if (!GetPerformanceInfo(&performanceInfo, performanceInfo.cb)) {
-  //     return {"Failed to get Performance Information. System error message: " + to_string(GetLastError()), "500"};
-  //   }
-  //
-  //   double pageMB = (double)performanceInfo.PageSize / (1024.0 * 1024.0);
-  //
-  //   std::stringstream outputBuffer;
-  //   outputBuffer << WHITE << "\n====={ Performance Information }=====\n" << RESET_TEXT;
-  //   outputBuffer << "  CommitTotal:          " << (double)performanceInfo.CommitTotal * pageMB << " MB\n";
-  //   outputBuffer << "  CommitLimit:          " << (double)performanceInfo.CommitLimit * pageMB << " MB\n";
-  //   outputBuffer << "  CommitPeak:           " << (double)performanceInfo.CommitPeak * pageMB << " MB\n";
-  //   outputBuffer << "  PhysicalTotal:        " << (double)performanceInfo.PhysicalTotal * pageMB << " MB\n";
-  //   outputBuffer << "  PhysicalAvailable:    " << (double)performanceInfo.PhysicalAvailable * pageMB << " MB\n";
-  //   outputBuffer << "  SystemCache:          " << (double)performanceInfo.SystemCache * pageMB << " MB\n";
-  //   outputBuffer << "  KernelTotal:          " << (double)performanceInfo.KernelTotal * pageMB << " MB\n";
-  //   outputBuffer << "  KernelPaged:          " << (double)performanceInfo.KernelPaged * pageMB << " MB\n";
-  //   outputBuffer << "  KernelNonpaged:       " << (double)performanceInfo.KernelNonpaged * pageMB << " MB\n";
-  //   outputBuffer << "  PageSize:             " << performanceInfo.PageSize << " bytes\n";
-  //   outputBuffer << "  HandleCount:          " << performanceInfo.HandleCount << "\n";
-  //   outputBuffer << "  ProcessCount:         " << performanceInfo.ProcessCount << "\n";
-  //   outputBuffer << "  ThreadCount:          " << performanceInfo.ThreadCount << "\n";
-  //
-  //   return {outputBuffer.str(), "200"};
-  // }
-
 
 
   // chat gave me this which should encode everything correctly

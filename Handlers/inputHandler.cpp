@@ -1,14 +1,14 @@
 #include "inputHandler.h"
 #include "../TerminalFormatting.h"
-
-bool containsPipe;
+#include "commandHandler.h"
+#include "pipeHandler.h"
 
 using namespace VT;
 
 
 void printBadCommandResult(const vector<string>& commandOutput) {
   cerr << "    got:  [";
-  int size = commandOutput.size();
+  int size = (int)commandOutput.size();
   for (int i = 0; i < size; ++i) {
     cerr << '"' << commandOutput[i] << '"';
     if (i < size - 1) { cerr << ", "; }
@@ -54,7 +54,7 @@ void displayOutput(const vector<string>& commandOutput) {
 }
 
 
-vector<string> tokenizeInput(const string& inputString) {
+vector<string> tokenizeInput(const string& inputString, bool removeQuotes) {
     std::istringstream wordSeparator(inputString);
     vector<string> tokens;
     string token;
@@ -64,14 +64,16 @@ vector<string> tokenizeInput(const string& inputString) {
 
         if (token[0] == '"') { // logic for quoted input. quotes will be automatically removed
             string quotedToken;
-            string word = token.erase(0, 1);
-            do { // gets next token until we hit a word that ends with " or until the input ends
-                quotedToken += word + " ";
-            } while (word[word.size() - 1] != '"' and wordSeparator >> word);
 
-            quotedToken.erase(quotedToken.size() - 1);
-            if (quotedToken[quotedToken.size() - 1] == '"') {
-              quotedToken.erase(quotedToken.size() - 1); } // removed trailing "
+            if (removeQuotes) { token = token.erase(0, 1); }
+            do { // gets next token until we hit a word that ends with " or until the input ends
+                quotedToken += token + " ";
+            } while (token[token.size() - 1] != '"' and wordSeparator >> token);
+            quotedToken.erase(quotedToken.size() - 1); // for some reason there is always an addition whitespace that gets thrown onto the end
+
+            if (removeQuotes) { // removed trailing "
+              if (quotedToken[quotedToken.size() - 1] == '"') { quotedToken.erase(quotedToken.size() - 1); }
+            }
             tokens.push_back(quotedToken);
         }
         else { tokens.push_back(token); }
@@ -82,7 +84,7 @@ vector<string> tokenizeInput(const string& inputString) {
 
 void inputHandler(const string& userInput) {
   containsPipe = false;
-  vector<string> tokens = tokenizeInput(userInput);
+  vector<string> tokens = tokenizeInput(userInput, true);
   if (containsPipe) { displayOutput(pipeHandler(tokens)); }
-  else { displayOutput(commandHandler(tokens)); }
+  else { displayOutput(commandHandler(tokens, false)); }
 }

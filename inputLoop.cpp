@@ -30,7 +30,7 @@ int displayCurrentDirectory() {
     TCHAR pathBuffer[MAX_PATH];
     DWORD length = GetCurrentDirectory(MAX_PATH, pathBuffer); // windows system call
     if (length == 0) {
-      cerr << "FATAL ERROR: failed to fetch current directory. Exiting Armadillo" << endl;
+      std::cerr << "FATAL ERROR: failed to fetch current directory. Exiting Armadillo" << endl;
       return -1;
     }
     cout << BLUE << "ARDO"
