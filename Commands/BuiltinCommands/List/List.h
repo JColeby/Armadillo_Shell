@@ -35,6 +35,9 @@ public:
     if (tokens.size() == 1 or tokens.empty()) {
       return true;
     }
+    if (tokens.size() == 2) {
+      return tokens[0] == "-a" 
+    }
     return false;
 
   }
@@ -46,24 +49,37 @@ public:
       return { "ls: too many arguments", "400"};
     }
 
-    const char* path = nullptr;
+    bool showHidden = false;
+    std::string pathStr = ".";
 
-    if (tokenizedCommand.empty()) {
-      path = ".";
-    } else {
-      path = tokenizedCommand[0].c_str();
+    if (tokenizedCommand.size() == 1) {
+      if (tokenizedCommand[0] == "-a") {
+        showHidden = true;
+      } else {
+        pathStr = tokenizedCommand[0];
+      }
+    }
+    else if (tokenizedCommand.size() == 2){
+      showHidden = true;
+      pathStr = tokenizedCommand[1];
     }
 
+    const char* path = nullptr;
     DIR* dir = opendir(path);
     if (!dir) {
-      return { "ls: cannot open directory: " + tokenizedCommand[0], "404"};
+      return { "ls: cannot open directory: " + pathStr, "404"};
     }
 
     std::string output;
     struct dirent* entry;
 
     while ((entry = readdir(dir)) != nullptr) {
-      output += entry->d_name;
+      std::string name = entry->d_name;
+      
+      if (!showHidden && !name.empty() && name[0] == ".") {
+        continue
+      }
+      output += name;
       output += "\n";
     }
 
