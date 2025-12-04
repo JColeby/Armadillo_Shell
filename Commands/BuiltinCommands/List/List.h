@@ -32,11 +32,11 @@ public:
     // in the execute command itself.
     // tokens should contain all of the command inputs the user provided
     // in order. However, It will not contain the command at the start.
-    if (tokens.size() == 1 or tokens.empty()) {
+    if (tokens.size() == 1 || tokens.empty()) {
       return true;
     }
     if (tokens.size() == 2) {
-      return tokens[0] == "-a" 
+      return tokens[0] == "-a"; 
     }
     return false;
 
@@ -64,7 +64,7 @@ public:
       pathStr = tokenizedCommand[1];
     }
 
-    const char* path = nullptr;
+    const char* path = pathStr.c_str();
     DIR* dir = opendir(path);
     if (!dir) {
       return { "ls: cannot open directory: " + pathStr, "404"};
@@ -75,9 +75,9 @@ public:
 
     while ((entry = readdir(dir)) != nullptr) {
       std::string name = entry->d_name;
-      
-      if (!showHidden && !name.empty() && name[0] == ".") {
-        continue
+
+      if (!showHidden && !name.empty() && name[0] == '.') {
+        continue;
       }
       output += name;
       output += "\n";
@@ -86,7 +86,7 @@ public:
 
     closedir(dir);
 
-    return { output, "200 "};
+    return { output, "200"};
   }
 
 private:
