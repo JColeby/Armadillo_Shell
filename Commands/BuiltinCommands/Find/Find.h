@@ -175,6 +175,7 @@ private:
     }
   }
 
+
   // will return true if we found a match and the getAllMatches flag is false
   bool search(string file, string currentDirectory, bool isDirectory) {
       if (desiredFile.front() == '*' and desiredFile.back() == '*') {
@@ -211,6 +212,7 @@ private:
       }
       return false;
   }
+
 
   // adds the found filepath to our matches list and returns true if getAllMatches is set to false
   bool addFoundItem(string& file, string& currentDirectory, bool isDirectory) {

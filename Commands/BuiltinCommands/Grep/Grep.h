@@ -31,16 +31,46 @@ public:
     // in the execute command itself.
     // tokens should contain all of the command inputs the user provided
     // in order. However, It will not contain the command at the start.
-    return true;
+    if(tokens.size()==2 || tokens.size()==3){
+      return true;
+    }
+    else{
+      return false;
+    }
   }
 
   vector<string> executeCommand() override {
-    // TODO: implement
-    // Will assume validateSyntax was already called, but add error handling just in case
-    return {"Not Implemented", "500"}; ;;
+    return {"Implement!", "200"};
   }
 
 private:
   // put your own method definitions here
 };
 
+// TODO: implement
+    // Will assume validateSyntax was already called, but add error handling just in case
+    // std::string stringToFind = tokenizedCommand[0];
+    // std::string whereToLook = tokenizedCommand[1];
+    // std::string whereToStore = tokenizedCommand[2];
+    // bool outfile=false;
+    //
+    // std::ifstream inputFile(whereToLook);
+    // if(!inputFile){
+    //   return {"Unable to open input file", "400"};
+    // }
+    // if(whereToStore != NULL){
+    //   std::ofstream outputFile(whereToStore, std::ofstream);
+    //   if(!file.is_open()) {
+    //     return {"Unable to open output file", "400"};
+    //   }
+    //   outfile=true;
+    // }
+    // try{
+    //   string line;
+    //   while(std::getline(inputFile, line)){
+    //     if(line.find(stringToFind) != string::npos){
+    //       outputFile << line << std::endl;
+    //       std::cout << line << std::endl;
+    //     }
+    //   }
+    // }

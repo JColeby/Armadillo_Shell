@@ -28,14 +28,14 @@ public:
 
   vector<string> executeCommand() override {
     stringstream commands;
-    commands << WHITE << "File and Directory Commands: " << RESET_TEXT;
+    commands << WHITE << "File and Directory Commands:  " << RESET_TEXT;
     commands << "cat, cd, cp, edit, find, mkdir, ls, pwd, rm" << endl;
-    commands << WHITE << "System Commands: " << RESET_TEXT;
+    commands << WHITE << "System Commands:              " << RESET_TEXT;
     commands << "date, ps, run, sys" << endl;
-    commands << WHITE << "Informative Commands: " << RESET_TEXT;
-    commands << "cmd, man" << endl;
-    commands << WHITE << "Other Commands: " << RESET_TEXT;
-    commands << "echo, grep";
+    commands << WHITE << "Informative Commands:         " << RESET_TEXT;
+    commands << "cmd, help, man" << endl;
+    commands << WHITE << "Other Commands:               " << RESET_TEXT;
+    commands << "clear, echo, exit, grep";
     return {commands.str(), "200"};
   }
 

@@ -1,10 +1,7 @@
 #pragma once
 #include <string>
 
-//
-// Virtual Terminal (VT) Escape Sequences for Windows and ANSI terminals
-// Use these after calling enableVTMode() in your program.
-//
+// Use these to add custom colors to your text
 
 namespace VT {
 
@@ -19,17 +16,6 @@ namespace VT {
     constexpr const char* UNDERLINE    = "\x1b[4m";
     constexpr const char* INVERT       = "\x1b[7m";
     constexpr const char* HIDE         = "\x1b[8m";
-
-    // --- Cursor visibility ---
-    constexpr const char* CURSOR_HIDE  = "\x1b[?25l";
-    constexpr const char* CURSOR_SHOW  = "\x1b[?25h";
-
-    // --- Screen control ---
-    constexpr const char* CLEAR_SCREEN     = "\x1b[2J";
-    constexpr const char* CLEAR_LINE       = "\x1b[2K";
-    constexpr const char* CURSOR_TOP_LEFT  = "\x1b[H";
-    constexpr const char* SAVE_CURSOR      = "\x1b[s";
-    constexpr const char* RESTORE_CURSOR   = "\x1b[u";
 
     // --- Text colors (foreground) ---
     constexpr const char* YELLOW  = "\x1b[93m";
@@ -70,14 +56,5 @@ namespace VT {
     inline std::string setBgColor(int r, int g, int b) {
         return "\x1b[48;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
     }
-
-    // --- Cursor movement helpers ---
-    inline std::string moveCursor(int row, int col) {
-        return "\x1b[" + std::to_string(row) + ";" + std::to_string(col) + "H";
-    }
-    inline std::string moveCursorUp(int n = 1)    { return "\x1b[" + std::to_string(n) + "A"; }
-    inline std::string moveCursorDown(int n = 1)  { return "\x1b[" + std::to_string(n) + "B"; }
-    inline std::string moveCursorRight(int n = 1) { return "\x1b[" + std::to_string(n) + "C"; }
-    inline std::string moveCursorLeft(int n = 1)  { return "\x1b[" + std::to_string(n) + "D"; }
 
 } // namespace VT
