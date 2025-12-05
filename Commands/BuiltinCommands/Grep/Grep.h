@@ -40,7 +40,14 @@ public:
   }
 
   vector<string> executeCommand() override {
-    // TODO: implement
+    return {"Implement!", "200"};
+  }
+
+private:
+  // put your own method definitions here
+};
+
+// TODO: implement
     // Will assume validateSyntax was already called, but add error handling just in case
     // std::string stringToFind = tokenizedCommand[0];
     // std::string whereToLook = tokenizedCommand[1];
@@ -67,10 +74,3 @@ public:
     //     }
     //   }
     // }
-    return {"Done!", "200"};
-  }
-
-private:
-  // put your own method definitions here
-};
-
