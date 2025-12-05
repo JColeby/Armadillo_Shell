@@ -21,7 +21,7 @@ vector<string> validateAndExecuteCommand(vector<string>& tokenizedInput, bool va
   if (validateOnly) { return {"valid syntax", "200"}; }
 
   // make sure the class passed in inherits the Command class
-  static_assert(is_base_of<Command<T>, T>::value, "T must inherit CommandBase");
+  static_assert(is_base_of<Command<T>, T>::value, "Command Class must inherit CommandBase");
 
   unique_ptr<T> instance = std::make_unique<T>(input); // creates a new object instance
   if (!instance) { return {"Failed to create command object", "500"}; } // if no object was created

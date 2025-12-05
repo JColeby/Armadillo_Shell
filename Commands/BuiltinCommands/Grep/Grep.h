@@ -42,31 +42,31 @@ public:
   vector<string> executeCommand() override {
     // TODO: implement
     // Will assume validateSyntax was already called, but add error handling just in case
-    std::string stringToFind = tokenizedCommand[0];
-    std::string whereToLook = tokenizedCommand[1];
-    std::string whereToStore = tokenizedCommand[2];
-    bool outfile=false;
-
-    std::ifstream inputFile(whereToLook);
-    if(!inputFile){
-      return {"Unable to open input file", "400"};
-    }
-    if(whereToStore != NULL){
-      std::ofstream outputFile(whereToStore, std::ofstream);
-      if(!file.is_open()) {
-        return {"Unable to open output file", "400"};
-      }
-      outfile=true;
-    }
-    try{
-      string line;
-      while(std::getline(inputFile, line)){
-        if(line.find(stringToFind) != string::npos){
-          outputFile << line << std::endl;
-          std::cout << line << std::endl;
-        }
-      }
-    }
+    // std::string stringToFind = tokenizedCommand[0];
+    // std::string whereToLook = tokenizedCommand[1];
+    // std::string whereToStore = tokenizedCommand[2];
+    // bool outfile=false;
+    //
+    // std::ifstream inputFile(whereToLook);
+    // if(!inputFile){
+    //   return {"Unable to open input file", "400"};
+    // }
+    // if(whereToStore != NULL){
+    //   std::ofstream outputFile(whereToStore, std::ofstream);
+    //   if(!file.is_open()) {
+    //     return {"Unable to open output file", "400"};
+    //   }
+    //   outfile=true;
+    // }
+    // try{
+    //   string line;
+    //   while(std::getline(inputFile, line)){
+    //     if(line.find(stringToFind) != string::npos){
+    //       outputFile << line << std::endl;
+    //       std::cout << line << std::endl;
+    //     }
+    //   }
+    // }
     return {"Done!", "200"};
   }
 
