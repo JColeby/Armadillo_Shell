@@ -4,6 +4,7 @@
 #include <vector>
 #include "../../Command.h"
 #include "Manual.h"
+#include <filesystem>
 
 namespace fs = std::filesystem;
 
@@ -32,14 +33,14 @@ public:
       return true;
     }
     if (tokens.size() >= 2 && tokens[0] == "-r"){
-      retirn true;
+      return true;
     }
     return false;
   }
 
   std::vector<std::string> executeCommand() override {
     if (!validateSyntax(tokenizedCommand)) {
-      return {"Not Implemented", "500"};
+      return {"Invalid usage", "500"};
     }
 
     bool recursive = false;
@@ -62,7 +63,7 @@ public:
         continue;
       }
 
-      if (fs::ls_directory(path) && !recursive) {
+      if (fs::is_directory(path) && !recursive) {
         output += "rm: cannot remove directory: '" + target + "': is a directory\n";
         continue;
       }
@@ -70,15 +71,21 @@ public:
       try {
         if (recursive) {
           fs::remove_all(path);
-          output += "removed recursively: " + "\n";
+          output += "removed recursively: " + target + "\n";
+        } else {
+          if (fs::remove(path)) {
+            output += "removed: " + target + "\n";
+          } else {
+            output += "rm: failed to remove: " + target + "\n";
+          }
         }
       }
 
-      catcj (...) {
+      catch (...) {
         output += "rm: failed to remove: " + target + "\n";
       }
     }
-    return { output, "200"}
+    return { output, "200"};
   }
 
 
