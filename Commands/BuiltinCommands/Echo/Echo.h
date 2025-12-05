@@ -29,13 +29,18 @@ public:
     // in the execute command itself.
     // tokens should contain all of the command inputs the user provided
     // in order. However, It will not contain the command at the start.
-    return true;
+    if(tokens.size() == 1){
+            return true;
+        }
+        else{
+            return false;
+        }
   }
 
   vector<string> executeCommand() override {
     // TODO: implement
     // Will assume validateSyntax was already called, but add error handling just in case
-    return {"Not Implemented", "500"}; ;;
+    return {tokenizedCommand[0], "200"}; 
   }
 
 private:
