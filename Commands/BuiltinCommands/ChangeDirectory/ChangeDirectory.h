@@ -1,8 +1,7 @@
 #pragma once
 #include <string>
 #include <iostream>
-#include <vector>
-#include <unistd.h>     // chdir, getcwd
+#include <vector>     // chdir, getcwd
 #include <limits.h>     // PATH_MAX
 #include "../../Command.h"
 #include "Manual.h"
