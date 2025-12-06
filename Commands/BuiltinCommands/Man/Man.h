@@ -1,11 +1,17 @@
 #pragma once
-#include <string>
-#include <iostream>
-#include <vector>
 #include "../../Command.h"
+#include "../../importAllCommands.h"
+#include "../Help/Help.h"
+#include "../PrintWorkingDirectory/PrintWorkingDirectory.h"
+#include "../Process/Process.h"
+#include "../Remove/Remove.h"
+#include "../Run/Run.h"
+#include "../SaveTo/SaveTo.h"
+#include "../SystemInfo/SystemInfo.h"
 #include "Manual.h"
 
-
+#include <string>
+#include <vector>
 
 // ===================={ Man Command }====================
 // TODO: add documentation to the manual file so James knows what flags and other info you implemented
@@ -25,19 +31,12 @@ public:
   }
 
   static bool validateSyntax(vector<string>& tokens) {
-    // TODO: implement
-    // this should be a simple validation so it can be used when validating
-    // commands that are getting piped. More thorough validations can be done
-    // in the execute command itself.
-    // tokens should contain all of the command inputs the user provided
-    // in order. However, It will not contain the command at the start.
-    return true;
+    if (tokens.size() == 1) { return true; }
+    return false;
   }
 
   vector<string> executeCommand() override {
-    // TODO: implement
-    // Will assume validateSyntax was already called, but add error handling just in case
-    return {"Not Implemented", "500"}; ;;
+    return { "'" + tokenizedCommand[0] + "' is not a valid command", "4"};
   }
 
 private:

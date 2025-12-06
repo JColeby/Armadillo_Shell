@@ -2,9 +2,13 @@
 #include <string>
 
 const std::string ListManual = R"(
-Syntax:
-    ls <flags>
+    List Command:
+        Displays files and directories in the current working directory
 
-Flags:
-    -a  displays hidden contents of current directory
+    Syntax:
+        ls <flags>
+
+    Flags:
+        -a  displays hidden contents of current directory
+
 )";

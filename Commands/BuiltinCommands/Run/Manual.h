@@ -1,5 +1,11 @@
 #pragma once
 #include <string>
 
-const std::string RunManual = R"(Will run commands located inside an Armadillo script
+const std::string RunManual = R"(
+    Run Command:
+        lets run Armadillo files (.ardo)
+
+    Syntax:
+        run <file>
+
 )";
