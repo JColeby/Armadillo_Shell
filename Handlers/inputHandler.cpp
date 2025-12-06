@@ -48,8 +48,7 @@ void displayOutput(const vector<string>& commandOutput) {
          << "    Command didn't return a valid error code: " << endl;
     printBadCommandResult(commandOutput);
   }
-  int size = commandOutput[0].size();
-  if (commandOutput[0][size-1] != '\n') { cout << endl; }
+  if (!commandOutput[0].empty() && commandOutput[0].back() != '\n' && commandOutput[1] != "201") { cout << endl; }
   // waiting so we don't have stupid race condition with input loop when it displays the current directory
   std::this_thread::sleep_for(std::chrono::milliseconds(5));
   runningCommand = false;

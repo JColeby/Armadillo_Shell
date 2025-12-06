@@ -56,6 +56,7 @@ public:
     if (getMemory) { outputBuffer << getMemoryInfo(); }
     if (getDrive) { outputBuffer << getDriveInfo(); }
     if (getPerformance) { outputBuffer << getPerformanceInfo(); }
+    outputBuffer << endl;
     return {outputBuffer.str(), "200"};
   }
 
