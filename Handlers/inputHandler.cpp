@@ -27,27 +27,29 @@ void displayOutput(const vector<string>& commandOutput) {
   }
   else if (commandOutput[1][0] == '2') { // command ran successfully!
     if (commandOutput[1] != "201") { // ran successfully, but no string should be printed
-      cout << commandOutput[0] << endl;
+      cout << commandOutput[0];
     }
   }
   else if (commandOutput[1][0] == '3') { // unauthorized
-    cout << YELLOW << "UNAUTHORIZED: " << commandOutput[0] << endl << RESET_TEXT;
+    cout << YELLOW << "UNAUTHORIZED: " << commandOutput[0] << RESET_TEXT;
   }
   else if (commandOutput[1][0] == '4') { // user error
-    cout << YELLOW << "MALFORMED ERROR: " << commandOutput[0] << endl << RESET_TEXT;
+    cout << YELLOW << "MALFORMED ERROR: " << commandOutput[0] << RESET_TEXT;
   }
   else if (commandOutput[1][0] == '5') { // command error
-    cerr << RED << "ERROR: " << commandOutput[0] << endl << RESET_TEXT;
+    cerr << RED << "ERROR: " << commandOutput[0]  << RESET_TEXT;
   }
   else if (commandOutput[1][0] == '6') { // early exit successful
     cout << YELLOW << "Exited Command Successfully" << endl
-         << "  Command output: " << commandOutput[0] << endl << RESET_TEXT;
+         << "  Command output: " << commandOutput[0] << RESET_TEXT;
   }
   else {
     cerr << "ERROR: command output malformed." << endl
          << "    Command didn't return a valid error code: " << endl;
     printBadCommandResult(commandOutput);
   }
+  int size = commandOutput[0].size();
+  if (commandOutput[0][size-1] != '\n') { cout << endl; }
   // waiting so we don't have stupid race condition with input loop when it displays the current directory
   std::this_thread::sleep_for(std::chrono::milliseconds(5));
   runningCommand = false;

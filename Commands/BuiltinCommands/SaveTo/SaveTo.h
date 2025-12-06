@@ -1,0 +1,55 @@
+#pragma once
+#include <string>
+#include <iostream>
+#include <vector>
+#include "../../Command.h"
+#include "Manual.h"
+
+#include <fstream>
+
+// ===================={ save to Command }====================
+// TODO: DO NOT MODIFY THIS FILE DIRECTLY!!! Copy the contents of this file into a new header file
+// TODO: Please add test code! This will make it easier to debug the shell when making changes that could impact other files
+// I spent way too long trying to figure out how to get the test code to work for c++, so message me and I'll create a new file for tests
+// might be a good idea to create the manual first so you know how to implement the class
+
+class SaveTo : public Command<SaveTo> { // Command class needs to be inherited in order to work!!!
+  vector<string> tokenizedCommand;
+  // add more class variables as needed.
+
+public:
+  explicit SaveTo(vector<string>& tokens) {
+    tokenizedCommand = tokens; // should save arguments in the order they were passed in
+  }
+
+  static string returnManText() {
+    return SaveToManual;
+  }
+
+  static bool validateSyntax(vector<string>& tokens) {
+    if (tokens.size() != 2) { return false; }
+    return true;
+  }
+
+  vector<string> executeCommand() override {
+    std::ofstream outFile(tokenizedCommand[0]);
+
+    if (!outFile) { // check if file opened successfully
+      stringstream errorMessage;
+      errorMessage << "Error opening file: " << tokenizedCommand[0];
+      return {errorMessage.str(), "400"};
+    }
+
+    outFile << tokenizedCommand[1]; // write the string to the file
+
+    outFile.close(); // optional, file closes automatically when outFile goes out of scope
+    stringstream message;
+    message << "String successfully saved to " << tokenizedCommand[0];
+
+    return {message.str(), "200"};
+  }
+
+private:
+  // put your own method definitions here
+};
+

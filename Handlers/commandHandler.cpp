@@ -1,4 +1,6 @@
 #include "commandHandler.h"
+#include "../Commands/validateAndExecuteCommand.h"
+#include "../Commands/importAllCommands.h"
 
 
 // calls validateAndExecuteCommand and passes in the class associated with the command
@@ -25,6 +27,8 @@ vector<string> commandHandler(vector<string>& tokenizedInput, bool validateOnly)
     if (command == "cmd") { return validateAndExecuteCommand<Cmd>(tokenizedInput, validateOnly); }
     if (command == "cat") { return validateAndExecuteCommand<Cat>(tokenizedInput, validateOnly); }
     if (command == "help") { return validateAndExecuteCommand<Help>(tokenizedInput, validateOnly); }
+    if (command == "rm" or command == "remove") { return validateAndExecuteCommand<Remove>(tokenizedInput, validateOnly); }
+    if (command == "saveto" or command == "saveTo") { return validateAndExecuteCommand<SaveTo>(tokenizedInput, validateOnly); }
 
 
     return { "'" + tokenizedInput[0] + "' is not a valid command", "4"};
