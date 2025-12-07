@@ -29,6 +29,8 @@ vector<string> commandHandler(vector<string>& tokenizedInput, bool validateOnly)
     if (command == "help") { return validateAndExecuteCommand<Help>(tokenizedInput, validateOnly); }
     if (command == "rm" or command == "remove") { return validateAndExecuteCommand<Remove>(tokenizedInput, validateOnly); }
     if (command == "saveto" or command == "saveTo") { return validateAndExecuteCommand<SaveTo>(tokenizedInput, validateOnly); }
+    if (command == "touch") { return validateAndExecuteCommand<Touch>(tokenizedInput, validateOnly); }
+
 
 
     return { "'" + tokenizedInput[0] + "' is not a valid command", "4"};
