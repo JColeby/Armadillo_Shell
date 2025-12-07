@@ -1,11 +1,12 @@
 #pragma once
 #include <string>
 #include <iostream>
-#include <vector>
-#include <unistd.h>     // chdir, getcwd
+#include <vector>     
 #include <limits.h>     // PATH_MAX
 #include "../../Command.h"
 #include "Manual.h"
+
+namespace fs = std::filesystem;
 
 // ===================={ Change Directory Command }====================
 
@@ -25,35 +26,21 @@ public:
     return tokens.size() <= 1;
   }
 
-  vector<string> executeCommand() override {
-    if (!validateSyntax(tokenizedCommand)) {
-      return { "cd: too many arguments", "400" };
-    }
-
-    const char* targetPath = nullptr;
-
-    // Case: "cd" with NO arguments → go HOME
+  std::vector<std::string> executeCommand() override {
     if (tokenizedCommand.empty()) {
-      targetPath = getenv("HOME");
-      if (!targetPath) {
-        return { "cd: HOME not set", "500" };
-      }
-    }
-    // Case: "cd <path>"
-    else {
-      targetPath = tokenizedCommand[0].c_str();
+      return {"cd: missing directory,", "400"};
     }
 
-    if (chdir(targetPath) != 0) {
-      return { "cd: no such file or directory: " + tokenizedCommand[0], "404" };
+    if (!validateSyntax(tokenizedCommand)) {
+      return {"cd: usage: cd <directory>", "400"};
     }
 
-    // Return the new directory
-    char cwd[PATH_MAX];
-    if (!getcwd(cwd, sizeof(cwd))) {
-      return { "cd: changed directory but failed to get working directory", "500" };
+    try {
+      fs::current_path(tokenizedCommand[0]);          // attempt directory change
+      return {fs::current_path().string(), "200"};    // success → return new location
     }
-
-    return { string(cwd), "201" };
+    catch (...) {
+      return {"cd: no such file or directory", "404"}; // simple error message
+    }
   }
 };
