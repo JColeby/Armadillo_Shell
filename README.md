@@ -5,7 +5,7 @@ This is our final project for IT&C 344 Operating Systems.
 * Clone the repository into a folder.
 * Install g++ on your preferred terminal. Here is a video to help with this step.<br>
 <https://www.youtube.com/watch?v=8CNRX1Bk5sY>
-* Compile the repository for your computer using this command:
+* Inside the folder you cloned into, compile the repository for your computer using this command:
 ```
 g++ -std=c++17 -g armadillo.cpp Handlers/*.cpp inputLoop.cpp Globals/*.cpp -Iinclude -o Ardo.exe
 ```
