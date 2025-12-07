@@ -9,6 +9,7 @@
 #include "../SaveTo/SaveTo.h"
 #include "../SystemInfo/SystemInfo.h"
 #include "Manual.h"
+#include "../Touch/Touch.h"
 
 #include <string>
 #include <vector>
@@ -36,7 +37,34 @@ public:
   }
 
   vector<string> executeCommand() override {
-    return { "'" + tokenizedCommand[0] + "' is not a valid command", "4"};
+    //return { "'" + tokenizedCommand[0] + "' is not a valid command", "4"};
+    const string command = tokenizedCommand[0];
+    // if (command == "clear") { system("cls"); return {"Screen Cleared", "201"}; }
+    //if (command == "example") { return validateAndExecuteCommand<ExampleCommand>(tokenizedInput, validateOnly); }
+    if (command == "example") { return {ExampleCommand::returnManText(), "200"};}
+    if (command == "example2") { return {ExampleCommand2::returnManText(), "200"}; }
+    if (command == "run") { return {Run::returnManText(), "200"}; }
+    if (command == "edit") { return {Edit::returnManText(), "200"}; }
+    if (command == "process" or command == "ps") { return {Process::returnManText(), "200"}; }
+    if (command == "find") { return {Find::returnManText(), "200"}; }
+    if (command == "changeDirectory" or command == "cd") { return {ChangeDirectory::returnManText(), "200"}; }
+    if (command == "copy" or command == "cp") { return {Copy::returnManText(), "200"}; }
+    if (command == "echo") { return {Echo::returnManText(), "200"}; }
+    if (command == "grep") { return {Grep::returnManText(), "200"}; }
+    if (command == "list" or command == "ls") { return {List::returnManText(), "200"}; }
+    if (command == "makeDirectory" or command == "mkdir") { return {MakeDirectory::returnManText(), "200"}; }
+    if (command == "manual" or command == "man") { return {Man::returnManText(), "200"}; }
+    if (command == "printWorkingDirectory" or command == "pwd") { return {PrintWorkingDirectory::returnManText(), "200"}; }
+    if (command == "find") { return {Find::returnManText(), "200"}; }
+    if (command == "sys" or command == "systemInfo") { return {SystemInfo::returnManText(), "200"}; }
+    if (command == "date") { return {Date::returnManText(), "200"}; }
+    if (command == "cmd") { return {Cmd::returnManText(), "200"}; }
+    if (command == "cat") { return {Cat::returnManText(), "200"}; }
+    if (command == "help") { return {Help::returnManText(), "200"}; }
+    if (command == "touch") { return {Touch::returnManText(), "200"}; }
+    if (command == "rm" or command == "remove") { return {Remove::returnManText(), "200"}; }
+    if (command == "saveto" or command == "saveTo") { return {SaveTo::returnManText(), "200"}; }
+    return { "'" + command + "' is not a valid command", "400"};
   }
 
 private:
