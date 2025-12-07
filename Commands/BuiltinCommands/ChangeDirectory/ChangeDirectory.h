@@ -26,17 +26,21 @@ public:
     return tokens.size() <= 1;
   }
 
-    std::vector<std::string> executeCommand() override {
-      if (!validateSyntax(tokenizedCommand)) {
-          return {"cd: usage: cd <directory>", "400"};
-      }
+  std::vector<std::string> executeCommand() override {
+    if (tokenizedCommand.empty()) {
+      return {"cd: missing directory,", "400"};
+    }
 
-      try {
-          fs::current_path(tokenizedCommand[0]);          // attempt directory change
-          return {fs::current_path().string(), "200"};    // success → return new location
-      }
-      catch (...) {
-          return {"cd: no such file or directory", "404"}; // simple error message
-      }
+    if (!validateSyntax(tokenizedCommand)) {
+      return {"cd: usage: cd <directory>", "400"};
+    }
+
+    try {
+      fs::current_path(tokenizedCommand[0]);          // attempt directory change
+      return {fs::current_path().string(), "200"};    // success → return new location
+    }
+    catch (...) {
+      return {"cd: no such file or directory", "404"}; // simple error message
+    }
   }
 };
