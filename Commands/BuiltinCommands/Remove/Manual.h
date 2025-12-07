@@ -2,8 +2,13 @@
 #include <string>
 
 const std::string RemoveManual = R"(
-Syntax:
-    rm <directory/file> <flag>
-Flags: 
-    -r recursive deletion in directory
+    Remove Command:
+        lets you delete files and directories
+
+    Syntax:
+        rm <flag> <directory/file>
+
+    Flags:
+        -r recursive deletion in directory
+
 )";

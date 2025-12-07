@@ -2,6 +2,10 @@
 #include <string>
 
 const std::string ChangeDirectoryManual = R"(
-Syntax:
-    cd <directory>
+    Change Directory Command:
+        allows you to change the current working directory
+
+    Syntax:
+        cd <directory>
+
 )";

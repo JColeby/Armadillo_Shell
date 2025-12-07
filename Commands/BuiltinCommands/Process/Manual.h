@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
 
-const std::string ProcessManual = R"(Process Command:
-    will show all the processes currently running.
+const std::string ProcessManual = R"(
+    Process Command:
+        will show all the processes currently running.
 
     Syntax:
         process <flags>

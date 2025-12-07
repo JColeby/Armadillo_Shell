@@ -2,12 +2,17 @@
 #include <string>
 
 const std::string GrepManual = R"(
-This file will contain the text that shows up when you call the manual command for this class.
-All the code/files for the command should remain inside its own folder.
-The name of this file should always be Manual.txt
-When writing the manual, make sure to include valid flags
+    Grep Command:
+        stands for Global Regular Expression Print. Uses regular expressions to filter text
 
-for whoever is creating the manual command, import "importAllCommands.h" so you don't have to define each command,
-this will be useful for getting the manual file path
+    Syntax:
+        grep <flags> <regex> <stringOfText>
+
+    Flags:
+        -v     inverts matches
+        -i     ignores casing
+
+    works best if you pipe the output of other commands into this one
 
 )";
+

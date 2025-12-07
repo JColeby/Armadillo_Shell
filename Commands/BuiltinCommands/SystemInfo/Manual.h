@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
 
-const std::string SystemInfoManual = R"(SystemInfo Command:
-    displays information about your computer
+const std::string SystemInfoManual = R"(
+    SystemInfo Command:
+        displays information about your computer
 
     Syntax:
         sys <flags>
@@ -15,4 +16,5 @@ const std::string SystemInfoManual = R"(SystemInfo Command:
         -d      displays drive information
 
     Will display all options if no flags are provided
+
 )";

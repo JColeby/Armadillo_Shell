@@ -4,6 +4,7 @@
 #include <vector>
 #include "../../Command.h"
 #include "Manual.h"
+#include <regex>
 
 
 
@@ -13,64 +14,73 @@
 
 class Grep : public Command<Grep> { // Command class needs to be inherited in order to work!!!
   vector<string> tokenizedCommand;
+  bool dontIncludeRegex;
+  bool notCaseSensitive;
   // add more class variables as needed.
 
 public:
   explicit Grep(vector<string>& tokens) {
     tokenizedCommand = tokens; // should save arguments in the order they were passed in
+    dontIncludeRegex = false;
+    notCaseSensitive = false;
   }
+
 
   static string returnManText() {
     return GrepManual;
   }
 
+
   static bool validateSyntax(vector<string>& tokens) {
-    // TODO: implement
-    // this should be a simple validation so it can be used when validating
-    // commands that are getting piped. More thorough validations can be done
-    // in the execute command itself.
-    // tokens should contain all of the command inputs the user provided
-    // in order. However, It will not contain the command at the start.
-    if(tokens.size()==2 || tokens.size()==3){
-      return true;
-    }
-    else{
-      return false;
-    }
+    if (tokens.size()==2) { return true; }
+    if (tokens.size()==3 and tokens[0][0] == '-') { return true; }
+    return false;
   }
 
+
   vector<string> executeCommand() override {
-    return {"Implement!", "200"};
+    int cmdSize = tokenizedCommand.size();
+    setFlags();
+    try {
+      std::regex regularExpression;
+      if (notCaseSensitive) {
+        regularExpression = std::regex(tokenizedCommand[cmdSize-2], std::regex_constants::icase);
+      } else {
+        regularExpression = std::regex(tokenizedCommand[cmdSize-2]);
+      }
+      stringstream inputString(tokenizedCommand[cmdSize-1]);
+      stringstream output;
+      string line;
+      std::smatch match;
+      while (std::getline(inputString, line)) { // Read line by line until end of stream
+        bool matchFound = std::regex_search(line, match, regularExpression);
+        if ((matchFound and !dontIncludeRegex) or (!matchFound and dontIncludeRegex)) {
+          output << line << "\n";
+        }
+      }
+      return {output.str(), "200"};
+
+    } catch (const std::regex_error& e) {
+      stringstream errorMessage;
+      errorMessage << "Invalid regular expression: " << e.what();
+      return {errorMessage.str(), "400"};
+    }
   }
 
 private:
+  void setFlags() {
+    for (string param : tokenizedCommand) {
+      if (param[0] == '-') {
+        for (int i = 1; i < param.size(); i++) {
+          switch (param[i]) {
+          case 'v': dontIncludeRegex = true; break;
+          case 'i': notCaseSensitive = true; break;
+          default: break;
+          }
+        }
+      }
+    }
+  }
   // put your own method definitions here
 };
 
-// TODO: implement
-    // Will assume validateSyntax was already called, but add error handling just in case
-    // std::string stringToFind = tokenizedCommand[0];
-    // std::string whereToLook = tokenizedCommand[1];
-    // std::string whereToStore = tokenizedCommand[2];
-    // bool outfile=false;
-    //
-    // std::ifstream inputFile(whereToLook);
-    // if(!inputFile){
-    //   return {"Unable to open input file", "400"};
-    // }
-    // if(whereToStore != NULL){
-    //   std::ofstream outputFile(whereToStore, std::ofstream);
-    //   if(!file.is_open()) {
-    //     return {"Unable to open output file", "400"};
-    //   }
-    //   outfile=true;
-    // }
-    // try{
-    //   string line;
-    //   while(std::getline(inputFile, line)){
-    //     if(line.find(stringToFind) != string::npos){
-    //       outputFile << line << std::endl;
-    //       std::cout << line << std::endl;
-    //     }
-    //   }
-    // }
