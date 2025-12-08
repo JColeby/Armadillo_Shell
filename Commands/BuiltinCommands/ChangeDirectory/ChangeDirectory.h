@@ -37,7 +37,7 @@ public:
 
     try {
       fs::current_path(tokenizedCommand[0]);          // attempt directory change
-      return {fs::current_path().string(), "200"};    // success → return new location
+      return {fs::current_path().string(), "201"};    // success → return new location
     }
     catch (...) {
       return {"cd: no such file or directory", "404"}; // simple error message
