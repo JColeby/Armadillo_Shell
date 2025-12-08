@@ -2,6 +2,10 @@
 #include <string>
 
 const std::string CopyManual = R"(
-Syntax:
-    cp <source> <destination>
+    Copy Command:
+        allows you to copy a file to a new location
+
+    Syntax:
+        cp <source> <destination>
+
 )";

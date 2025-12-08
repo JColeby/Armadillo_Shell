@@ -2,7 +2,10 @@
 #include <string>
 
 const std::string MakeDirectoryManual = R"(
-Syntax:
-    mkdir <directory name>
+    Make Directory Command:
+        will make a new directory
+
+    Syntax:
+        mkdir <newDirectoryName>
 
 )";

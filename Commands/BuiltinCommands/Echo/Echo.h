@@ -38,8 +38,6 @@ public:
   }
 
   vector<string> executeCommand() override {
-    // TODO: implement
-    // Will assume validateSyntax was already called, but add error handling just in case
     return {tokenizedCommand[0], "200"}; 
   }
 

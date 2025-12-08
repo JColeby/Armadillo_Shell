@@ -22,6 +22,10 @@
 #include "BuiltinCommands/Run/Run.h"
 #include "BuiltinCommands/SystemInfo/SystemInfo.h"
 #include "BuiltinCommands/Help/Help.h"
+#include "BuiltinCommands/Remove/Remove.h"
+#include "BuiltinCommands/SaveTo/SaveTo.h"
+#include "BuiltinCommands/Touch/Touch.h"
+
 
 
 using std::string;

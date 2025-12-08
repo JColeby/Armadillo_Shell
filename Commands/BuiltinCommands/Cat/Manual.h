@@ -2,6 +2,10 @@
 #include <string>
 
 const std::string CatManual = R"(
-Syntax:
-    cat <filename>
+    Cat Command:
+        will display the contents of a file
+
+    Syntax:
+        cat <filename>
+
 )";
