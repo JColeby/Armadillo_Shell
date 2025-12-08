@@ -5,6 +5,7 @@
 #include "../../Command.h"
 #include "Manual.h"
 #include <filesystem>
+#include <fstream>
 
 // ===================={ Cat Command }====================
 // TODO: add documentation to the manual file so James knows what flags and other info you implemented
