@@ -3,10 +3,10 @@
 
 const std::string FindManual = R"(
     Find Command:
-        finds files or directories within a provided folder .
+        recursively finds files or directories within a provided folder .
 
     Syntax:
-        find <starting directory> <desired file> <flags>
+        find  <desired file> <starting directory> <flags>
 
     Flags:
         -d      will only match directory names
